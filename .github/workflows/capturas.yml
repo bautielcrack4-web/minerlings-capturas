@@ -1,0 +1,100 @@
+# Capturas del juego Minerlings (repo publico: minutos de Actions gratis).
+# Primero las capturas del escenario isla_rig (se suben apenas salen) y despues un APK de prueba para el telefono.
+# Grupo de concurrencia propio: no cancela los builds de la rama de trabajo.
+name: Prueba mineros 3D - capturas
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: capturas
+  cancel-in-progress: true
+
+jobs:
+  prueba:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 150
+    env:
+      UNITY_VERSION: 6000.0.84f1
+      UNITY: /opt/unity/6000.0.84f1/Editor/Unity
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Liberar disco
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Dependencias del sistema
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libarchive-tools cpio xvfb libglu1-mesa libgtk-3-0 libnss3 libgbm1 libxss1 libasound2 >/dev/null
+          sudo mkdir -p /opt/unity && sudo chown -R "$USER" /opt/unity
+
+      - name: Editor de Unity
+        run: |
+          test -n "$UNITY_EMAIL" || { echo "::error::Falta el secreto UNITY_EMAIL"; exit 1; }
+          bash unity_tools/install_unity.sh
+          LIC="$HOME/.local/share/unity3d/Unity/Unity_lic.ulf"
+          if [ ! -s "$LIC" ]; then
+            /opt/unity/$UNITY_VERSION/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client \
+              --activate-ulf --username "$UNITY_EMAIL" --password "$UNITY_PASSWORD" 2>&1 | grep -viE "password" | tail -20 || true
+          fi
+
+      - name: Cache de Library (solo lectura de la importacion)
+        uses: actions/cache@v4
+        with:
+          path: unity_miner/Library
+          key: library-android-${{ hashFiles('unity_miner/Packages/packages-lock.json', 'unity_miner/ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: library-android-
+
+      - name: Capturas isla_rig (2x) e isla_show
+        continue-on-error: true
+        env:
+          SHOT_SCALE: "2"
+        run: |
+          mkdir -p shots
+          ESC=$(tr -d '\r' < unity_tools/prueba_escenarios.txt 2>/dev/null | grep -v '^#' | xargs)
+          [ -n "$ESC" ] || ESC="isla_mineros isla_kit"
+          echo "escenarios: $ESC"
+          for s in $ESC; do bash unity_tools/unity_shot.sh "$s" "$GITHUB_WORKSPACE/shots" || true; done
+          grep -h "check \|^shotcheck\|error CS" shots/*.log | head -80 || true
+          ls -la shots | head -40
+
+      - name: Referencias para compilar en la laptop (DLL del motor y de los paquetes)
+        if: always()
+        run: |
+          mkdir -p refs/engine refs/proj
+          cp /opt/unity/$UNITY_VERSION/Editor/Data/Managed/UnityEngine/*.dll refs/engine/ 2>/dev/null || true
+          cp /opt/unity/$UNITY_VERSION/Editor/Data/Managed/UnityEditor.dll refs/engine/ 2>/dev/null || true
+          cp unity_miner/Library/ScriptAssemblies/*.dll refs/proj/ 2>/dev/null || true
+          find /opt/unity/$UNITY_VERSION/Editor/Data/NetStandard/ref -name "netstandard.dll" -exec cp {} refs/engine/ \; 2>/dev/null || true
+          ls refs/engine | wc -l; ls refs/proj
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unity-refs
+          retention-days: 7
+          if-no-files-found: ignore
+          path: refs/
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: capturas-mineros3d
+          retention-days: 14
+          if-no-files-found: ignore
+          path: shots/
+
+      - name: Devolver la licencia
+        if: always()
+        run: |
+          /opt/unity/$UNITY_VERSION/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client \
+            --return-ulf --username "$UNITY_EMAIL" --password "$UNITY_PASSWORD" 2>&1 | tail -3 || true

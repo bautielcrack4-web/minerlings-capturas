@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Google Play In-App Review (Monetization/Reviews.cs). Lo agrega el resolvedor de dependencias de Google al build. -->
+<dependencies>
+  <androidPackages>
+    <androidPackage spec="com.google.android.play:review:2.0.2" />
+  </androidPackages>
+</dependencies>

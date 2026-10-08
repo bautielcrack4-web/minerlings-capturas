@@ -1,0 +1,778 @@
+# Minerlings: español -> inglés (una linea por texto; <> = no va en inglés)
+Casa de Mineros	Miner House
+Cada nivel suma un minero.	+1 miner per level.
+Ayuntamiento	Town Hall
+El corazón de la isla: recibe lo que traen los mineros y cada nivel desbloquea edificios.	The heart of your island. Each level unlocks buildings.
+Cantina	Canteen
+Los mineros cansados comen y recuperan energía.	Tired miners eat and recharge.
+Duchas	Showers
+Limpios rinden más: salen ¡Frescos! (+30% velocidad).	Clean miners work faster (+30%).
+Herrería	Smithy
+Picos más fuertes para todos. Fabrica picos y carretillas.	Stronger picks for all. Makes picks and carts.
+Mina de piedra	Stone Mine
+Saca piedra sola y deja ingreso constante.	Mines stone by itself.
+Faro	Lighthouse
+Atrae vetas raras (oro y gemas) y más vetas gigantes.	Attracts rare and giant ores.
+Muelle	Dock
+Llegan barcos que pagan el triple por pedidos.	Ships pay 3x for orders.
+Galpón	Barn
+Guarda las materias primas: piedra, madera, carbón, minerales.	Stores raw materials.
+Almacén	Storage
+Guarda los productos: lingotes, herramientas, vidrio, joyas.	Stores goods.
+Mina de carbón	Coal Mine
+Saca carbón: el combustible de hornos y fundiciones.	Mines coal for furnaces.
+Aserradero	Sawmill
+Corta madera de los árboles de la isla.	Cuts wood.
+Mina de hierro	Iron Mine
+Saca mineral de hierro.	Mines iron ore.
+Fundición	Foundry
+Hierro y carbón se vuelven lingotes.	Iron + coal = bars.
+Mina de cobre	Copper Mine
+Saca cobre para cables y piezas.	Mines copper.
+Cantera de arena	Sand Quarry
+Saca arena para el vidrio.	Digs sand for glass.
+Horno de vidrio	Glass Kiln
+Arena y carbón se vuelven vidrio.	Sand + coal = glass.
+Mercado	Market
+Vendé lo que sobra y comprale al mercader lo que falta.	Sell extras, buy what you need.
+Estación de tren	Train Station
+El tren lleva pedidos al continente: vagones con premio.	Fill train wagons for rewards.
+Taller mecánico	Workshop
+Fabrica cables, lámparas y motores.	Makes cables, lamps and motors.
+Banco	Bank
+Más horas de ganancia mientras no jugás.	Earn longer while away.
+Mina de oro	Gold Mine
+Saca pepitas de oro.	Mines gold nuggets.
+Refinería de oro	Gold Refinery
+Funde pepitas en lingotes de oro.	Nuggets = gold bars.
+Escuela de mineros	Miner School
+Los mineros aprenden más rápido (+20% experiencia por nivel).	Miners learn faster (+20% XP per level).
+Oficina de gerentes	Managers
+Un gerente cobra solo lo que sacan las minas.	Auto-collects your mines.
+Hospital	Hospital
+Los mineros cansados se recuperan el doble de rápido.	Tired miners recover 2x faster.
+Mina de gemas	Gem Mine
+Saca gemas en bruto.	Mines raw gems.
+Lapidario	Gem Cutter
+Talla las gemas en bruto.	Cuts raw gems.
+Joyería	Jeweler
+Oro y gemas talladas se vuelven anillos y coronas.	Gold + gems = rings and crowns.
+Aeropuerto de globos	Balloon Port
+Pedidos de lujo que pagan en gemas.	Luxury orders that pay gems.
+Pozo de cristal	Crystal Well
+Saca cristal mágico de las profundidades.	Pulls magic crystal from deep below.
+Laboratorio	Lab
+Cristal y motores se vuelven explosivos y brújulas.	Crystal + motors = explosives and compasses.
+Piedra	Stone
+Cobre	Copper
+Hierro	Iron
+Oro	Gold
+Gema	Gem
+Madera	Wood
+Carbón	Coal
+Mineral de hierro	Iron Ore
+Arena	Sand
+Pepita de oro	Gold Nugget
+Gema en bruto	Raw Gem
+Cristal	Crystal
+Lingote de hierro	Iron Bar
+Pico	Pick
+Carretilla	Cart
+Vidrio	Glass
+Lingote de oro	Gold Bar
+Gema tallada	Cut Gem
+Cable	Cable
+Lámpara	Lamp
+Anillo	Ring
+Corona	Crown
+Motor	Motor
+Explosivo	Explosive
+Brújula	Compass
+Mejorá la Casa a nivel 2	Upgrade the House to Lv 2
+Picá 8 rocas	Mine 8 rocks
+Cobrá 10 materiales de tus edificios	Collect 10 materials
+Tené 3 mineros	Have 3 miners
+Subí el Ayuntamiento a nivel 2	Town Hall Lv 2
+Subí el Ayuntamiento a nivel 3	Town Hall Lv 3
+Fabricá 5 lingotes de hierro	Make 5 iron bars
+Expandí la isla	Expand the island
+Romper una Veta Gigante	Break a Giant Ore
+Subí el Ayuntamiento a nivel 4	Town Hall Lv 4
+Completá un pedido de barco	Complete a ship order
+Fabricá 5 picos	Make 5 picks
+Subí el Ayuntamiento a nivel 5	Town Hall Lv 5
+Picá 10 de oro	Mine 10 gold
+Subí el Ayuntamiento a nivel 	Town Hall Lv 
+Fabricá 	Make 
+ productos	 goods
+Picá 	Mine 
+ rocas	 rocks
+Romper 	Break 
+ Vetas Gigantes	 Giant Ores
+Tocá vetas 	Tap ores 
+ veces	 times
+Abrí 2 cofres	Open 2 chests
+Rompé una veta gigante	Break a giant ore
+Atrapá 2 bichos	Catch 2 critters
+Completá 2 pedidos del tablón	Complete 2 orders
+Mejorá edificios 3 veces	Upgrade 3 times
+Hacé 5 golpes críticos	Land 5 crits
+Siempre con una sonrisa.	Always smiling.
+Canta mientras pica.	Sings while mining.
+No le teme a ninguna roca.	Fears no rock.
+Llega primero al trabajo.	First to work.
+Colecciona piedras raras.	Collects rare stones.
+Cuenta chistes malos.	Tells bad jokes.
+Veloz: camina un 30 % más rápido.	Speedy: walks 30% faster.
+Fortachona: pica un 30 % más fuerte.	Strong: mines 30% harder.
+Suertudo: a veces encuentra gemas.	Lucky: sometimes finds gems.
+Glotona: come el doble pero rinde x1.5.	Hungry: eats 2x, works x1.5.
+Dormilón: lento, pero de noche saca cristales.	Sleepy: slow, finds crystals at night.
+Forzuda: pica un 60 % más fuerte.	Mighty: mines 60% harder.
+Rayo: camina un 50 % más rápido.	Lightning: walks 50% faster.
+Capataz: los mineros cerca de ella rinden +15 %.	Boss: nearby miners +15%.
+Olfato de gema: muchas veces encuentra gemas.	Gem nose: often finds gems.
+Leyenda: pica el doble de fuerte.	Legend: mines 2x harder.
+Don Gema	Mr. Gem
+Abuela Pica	Granny Pick
+Común	Common
+Raro	Rare
+Épico	Epic
+Legendario	Legendary
+Limpiar las ruinas	Clear the ruins
+Pedestal de piedra	Stone base
+Piernas de la estatua	Statue legs
+Cuerpo y pico	Body and pick
+¡Baño de oro!	Gold plating!
+Cantero de flores	Flower bed
+Cerca de madera	Wooden fence
+Farol doble	Double lamp
+Arbusto podado	Topiary
+Fuente	Fountain
+Estatuita de minero	Miner statue
+Dinosaurio	Dinosaur
+Barco hundido	Sunken Ship
+Corona perdida	Lost Crown
+Cráneo	Skull
+Costillas	Ribs
+Pata	Leg
+Cola	Tail
+Timón	Helm
+Ancla	Anchor
+Cofre roto	Broken Chest
+Mascarón	Figurehead
+Aro de oro	Gold Hoop
+Rubí	Ruby
+Esmeralda	Emerald
+Zafiro	Sapphire
+Los pedidos pagan +25 %	Orders pay +25%
+Isla Verde	Green Isle
+Isla Dunas	Dune Isle
+Isla Volcánica	Volcano Isle
+Isla Cristal	Crystal Isle
+Isla Nevada	Snow Isle
+Fiebre del oro	Gold Rush
+Tesoros piratas	Pirate Treasure
+Cristales de luna	Moon Crystals
+Verano tropical	Tropical Summer
+Monedas	Coins
+2 gemas	2 gems
+Turbo	Boost
+Cofre	Chest
+¡Montaña!	Jackpot!
+Veta de Oro	Gold Ore
+5 gemas	5 gems
+Cofre de oro	Gold Chest
+Cofre de madera	Wood Chest
+Cofre de plata	Silver Chest
+Cofre legendario	Legendary Chest
+Oferta de inicio	Starter Pack
+500 gemas, un constructor más para siempre y 30 minutos de Turbo x2	500 gems, +1 builder forever, 30 min x2 boost
+Puñado de gemas	Handful of Gems
+80 gemas	80 gems
+Bolsa de gemas	Bag of Gems
+500 gemas	500 gems
+Cofre de gemas	Chest of Gems
+1 200 gemas	1,200 gems
+Carro de gemas	Cart of Gems
+2 600 gemas	2,600 gems
+Vagón de gemas	Wagon of Gems
+7 000 gemas	7,000 gems
+15 000 gemas	15,000 gems
+Constructor extra	Extra Builder
+Un constructor más para siempre	+1 builder forever
+Pase dorado	Gold Pass
+Desbloquea el carril dorado de la temporada	Unlocks the season's gold track
+Romper la alcancía	Piggy Bank
+Todas las gemas que juntó la alcancía	All the gems in your piggy bank
+Capataz	Foreman
+Premios de anuncios sin anuncios, un constructor más y x2 sin conexión	Ad rewards without ads, +1 builder, x2 offline
++500 gemas, +1 constructor y 30 min de Turbo x2	+500 gems, +1 builder, 30 min x2 boost
++1 constructor para siempre	+1 builder forever
+¡Pase dorado activado!	Gold Pass active!
+ gemas	 gems
+¡Sos Capataz!	You're the Foreman!
+-30 min de obra	-30 min build
+Mercader nuevo	New merchant
+Giro gratis	Free spin
+ · ¡TV dorada: cofre de oro!	 · Golden TV: Gold Chest!
+¡	<>
+ c/u	 each
+2.º 	2nd 
+ a 	 to 
+ y 	 & 
+Nuevo	New
+¡Fresco!	Fresh!
+¡Obra terminada!	Build complete!
+Pedido listo	Order ready
+¡Misión cumplida! 	Mission done! 
+¡Las tres misiones! Cofre de plata	All 3 missions! Silver Chest
+¡Nuevo día! Premio diario listo	New day! Daily reward ready
+Tengo hambre…	Hungry…
+Necesito una ducha…	Need a shower…
+¡Me siento fresco!	Feeling fresh!
+Zzz…	Zzz…
+¡Llevo 	Carrying 
+ nivel 	 Lv 
+ son amigos!	 are friends!
+¡Una gema!	A gem!
+¡Nivel 	Pass Lv 
+ del pase de temporada!	!
+¡Pieza del museo: 	Museum piece: 
+¡Colección completa!	Set complete!
+Maravilla 	Wonder 
+ listo. +8 % a todo	 done. +8% to all
+¡MARAVILLA TERMINADA!	WONDER COMPLETE!
+La Gran Estatua de Oro: +50 % a todo. ¡Ya podés zarpar a una isla nueva!	+50% to all. You can sail to a new island!
+¡Aparecieron unas ruinas misteriosas!	Mysterious ruins appeared!
+Belleza +	Beauty +
+¡EL GOLEM DE ROCA! Todos a pelear	ROCK GOLEM! Everyone fight!
+¡El golem se enoja!	The golem is angry!
+¡Furia del golem! Falta poco	Golem rage! Almost there
+¡GOLEM DERROTADO!	GOLEM DEFEATED!
+Nivel 	Level 
+: gemas, monedas y un cofre de oro	: gems, coins & a Gold Chest
+ construida!	 built!
+Nuevo terreno	New land
+¡EVOLUCIÓN!	EVOLVED!
+: etapa 	: stage 
+La marea trajo una botella…	A bottle washed ashore…
+¡Turbo 60 s!	Boost 60s!
+¡CRÍTICO!	CRIT!
+Empieza a llover…	Rain…
+¡Tormenta! Los rayos convierten vetas en cristal	Storm! Lightning turns ores to crystal
+¡Lluvia de meteoritos! Mirá el cielo	Meteor shower! Look up
+¡Cristal!	Crystal!
+¡Arcoíris! Todo vale +50 % por 2 minutos	Rainbow! +50% for 2 min
+Cae la noche: tocá los cristales que brillan	Night: tap the glowing crystals
+¡Buen día!	Good morning!
+¡Llegó un barco! Pide 	Ship! Wants 
+ de 	 
+¡Pedido cumplido! +	Order done! +
+ y gemas	 + gems
+El barco se fue. Vuelve pronto	The ship left
+¡Llegó el mercader! Tocá el globo: ruleta gratis	Merchant! Tap the balloon: free spin
+¡La isla creció! Nuevas parcelas y vetas	Island expanded!
+¡Veta Gigante rota! +2 gemas	Giant Ore broken! +2 gems
+¡VETA GIGANTE! Todos a picar	GIANT ORE! Everyone mine!
+¡Lleno!	Full!
+Zzz	Zzz
+ llegó!	 arrived!
+ min	 min
+Tenés 	You have 
+ constructor(es) libre(s): ¡a construir!	 free builder(s)
+Todos los constructores están trabajando	All builders busy
+Galpón lleno: mejoralo o vendé	Barn full: upgrade or sell
+Almacén lleno: mejoralo o vendé	Warehouse full: upgrade or sell
+¡Terminar!	Finish!
+¡Galpón lleno!	Barn full!
+¡Almacén lleno!	Warehouse full!
+¡Cadena x	Chain x
+En construcción	Building
+ (máximo)	 (max)
+  ·  tope 	  ·  max 
+Mover	Move
+Extracción	Extraction
+Transformación	Crafting
+Pueblo	Town
+Comercio	Trade
+Especial	Special
+Construyendo…	Building…
+Mejorando a nivel 	Upgrading to Lv 
+Te faltan gemas (metas, barcos, vetas gigantes, tren)	Not enough gems
+¡Terminar gratis!	Finish free!
+Terminar: 	Finish: 
+Las obras de 5 minutos o menos se terminan gratis.	Under 5 min? Finish free.
+-30 min	-30 min
+Cobrar	Collect
+¡Galpón lleno! Mejoralo o vendé lo que sobra	Barn full! Upgrade or sell
+ cada 	 every 
+  ·  gerente	  ·  manager
+Listo: 	Ready: 
+Producción	Production
+¡Almacén lleno! Mejoralo o vendé lo que sobra	Warehouse full! Upgrade or sell
+Cobrar 	Collect 
+Vacío	Empty
+Ayuntamiento 	Town Hall 
+Hacer	Make
+La cola está llena: mejorá el edificio para más lugares	Queue full: upgrade for more slots
+Te faltan ingredientes	Missing ingredients
++1 constructor	+1 builder
+Ampliar la isla	Expand island
+¡Ayuntamiento al máximo!	Town Hall maxed!
+El nivel 	Lv 
+ desbloquea:	 unlocks:
+Y además: 	Also: 
+El mercader vende	Merchant
+en 	in 
+Renovar	Refresh
+¡Comprado!	Bought!
+Vender (80 % del valor)	Sell (80%)
+No tenés nada para vender.	Nothing to sell.
+Todo	All
+Materias primas: 	Raw: 
+Productos: 	Goods: 
+Vendé lo que sobra en el Mercado (80 %).	Sell extras at the Market (80%).
+Sin Mercado, tocá un recurso en el Mercado futuro… o vendelo acá al 40 %:	No Market yet: sell here at 40%
+El tren se va en 	Train leaves in 
+El tren llega en 	Train arrives in 
+Cargá los 3 vagones y llevás monedas, gemas y un cofre.	Fill all 3 wagons: coins, gems & a chest.
+¡Cargado!	Loaded!
+Cargar	Load
+Te faltan 	Need 
+Se está construyendo…	Building…
+¡Nivel máximo!	Max level!
+Subí el Ayuntamiento para mejorarlo más	Upgrade Town Hall first
+Mejorar a nivel 	Upgrade to Lv 
+Ya se está mejorando	Already upgrading
+No hay constructores libres	No free builders
+Te faltan materiales	Missing materials
+Te faltan monedas	Not enough coins
+Construir	Build
+Constructores libres: 	Builders: 
+   ·   Ayuntamiento 	   ·   Town Hall 
+No hay nada nuevo para construir: subí el Ayuntamiento.	Upgrade Town Hall to unlock more.
+No hay constructores libres: esperá o terminá una obra	No free builders
+Materias primas	Raw Materials
+Productos	Goods
+Construí el Galpón para guardar más.	Build a Barn to store more.
+Construí el Almacén para guardar más.	Build a Warehouse to store more.
+Mineros	Miners
+Misiones	Missions
+Nivel	Level
+Nv 	Lv 
+Logros	Trophies
+Decorar	Decorate
+Tienda	Shop
+Ajustes	Settings
+Listo	Done
+Diario	Daily
+ día	 day
+ días	 days
+ seguidos	 streak
+Día 	Day 
+Cofre oro	Gold
+¡Cobrar día 	Claim day 
+Volvé mañana	Come back tomorrow
+¡Hasta mañana!	See you tomorrow!
+Salvar racha de 	Save 
+ días (	 day streak (
+ gemas)	 gems)
+Misiones de hoy	Today's missions
+¡Cofre de plata cobrado!	Silver Chest claimed!
+Completá las tres: cofre de plata	Complete all 3: Silver Chest
+¡LISTO!	DONE!
+Hecha	Done
+Pedidos	Orders
+Llevá mineral al depósito: pagan 4 veces más	Deliver ore: pays 4x
+LISTO	READY
+Nuevo pedido	New order
+ gema	 gem
+¡Nuevo recurso!	New resource!
+ monedas!	 coins!
+COMBO x	COMBO x
+¡FRENESÍ!	FRENZY!
+¡Pico doble y monedas en cada golpe!	Double pick & coins every hit!
+Arcoíris +50 %	Rainbow +50%
+Arcoíris +50 %  	Rainbow +50%  
+FRENESÍ	FRENZY
+¡Llegó el barco!	Ship's here!
+Tocá las cartas y elegí quién se queda	Tap a card, pick a miner
+¡DORADO!	GOLDEN!
+Elegir	Pick
+ se suma a la isla!	 joined!
+¡MINERO DORADO!	GOLDEN MINER!
+ rinde x1.5 y deja estela de oro	 works x1.5
+Álbum de mineros	Miner Album
+ descubiertos	 found
+¡Tocá la roca para picar!	Tap the rock!
+¡Tu minero también pica solo!	Your miner digs too!
+¡Mejorá la casa!	Upgrade the house!
+Picá para juntar 15 monedas	Mine 15 coins
+Picá para juntar 3 piedras	Mine 3 stone
+¡Picá un poco más!	Keep mining!
+¡Terminala gratis!	Finish it free!
+Construí el Aserradero	Build the Sawmill
+Picá para juntar 	Mine 
+ monedas	 coins
+¡Cobrá la madera!	Collect the wood!
+¡Podés mejorar esto!	Upgrade this!
+Arrastralo a donde quieras	Drag to place
+Movelo a donde quieras	Drag to move
+¡Zarpar a otra isla!	Sail to a new island!
+Ruinas misteriosas	Mysterious Ruins
+Gran Estatua de Oro	Great Gold Statue
+¡Terminada! +50 % a todo lo que se vende. Ya podés zarpar a una isla nueva.	Done! +50% to all. Sail to a new island!
+Algo enorme está tapado por las enredaderas… 	Something huge hides under the vines… 
+Fase 	Phase 
+. Cada fase: +8 % a todo.	. Each phase: +8% to all.
+¡Zarpar!	Sail!
+Construir  	Build  
+Tocá un lugar marcado para decorar	Tap a marked spot
+Belleza 	Beauty 
+Golem de Roca  nv 	Rock Golem  Lv 
+Pase: 	Pass: 
+Termina en 	Ends in 
+Gratis	Free
+Dorado	Gold
+Niveles 	Levels 
+Pase dorado: 	Gold Pass: 
+Ganás experiencia con misiones, pedidos, cofres, vetas gigantes, jefes y bichos	Earn XP from missions, orders, chests and events
+Cofre 	Chest 
+¡Cobrar!	Collect!
+Museo de la isla	Museum
+Las piezas salen al romper vetas y al cavar tesoros	Find pieces in ores and treasure
+  ¡completo!	  complete!
+Bonus: 	Bonus: 
+¡Zarpar a 	Sail to 
+ reliquias  (cada una: +10 % a todo, para siempre)	 relics (+10% each, forever)
+Te llevás: gemas, mineros, álbum, museo, pase y racha.\nEmpezás de cero: edificios, monedas y la Maravilla.\nLa isla nueva vale el triple.	Keep: gems, miners, album, museum, pass.\nReset: buildings, coins, Wonder.\nNew island pays 3x.
+Ruleta gratis	Free spin
+Ruleta del Mercader	Merchant Wheel
+¡GIRAR!	SPIN!
+Sin giros	No spins
+Girar otra vez	Spin again
+¡Genial!	Great!
+¡Veta de Oro gigante!	Giant Gold Ore!
+¡Cofre de oro!	Gold Chest!
+¡Cofre!	Chest!
+¡Turbo 1 minuto!	Boost 1 min!
+¡Mirá el cielo!	Look up!
+¡Tocá para mejorarlo!	Tap to upgrade!
+Intentos: 	Tries: 
+¡LEGENDARIO!	LEGENDARY!
+¡Subió! ¿Otra vez?	Upgraded! Again?
+Turbo 	Boost 
+Abrir otro	Open another
+Evoluciona en nivel 	Evolves at Lv 
+Ya viste todos los de hoy. ¡Mañana hay más!	No more ads today
+El anuncio todavía está cargando… probá en unos segundos	Ad loading… try again soon
+El anuncio no terminó: no hay premio esta vez	Ad not finished: no reward
+¡OFERTA DE INICIO!	STARTER PACK!
+x5 VALOR	x5 VALUE
+Alcancía: 	Piggy bank: 
+Se llena jugando	Fills as you play
+Para siempre	Forever
+Temporada actual	This season
+Capataz (suscripción mensual)	Foreman (monthly)
+Se renueva cada mes · cancelás cuando quieras desde la tienda	Renews monthly · cancel anytime in your store
+¡Sos Capataz! Gracias por apoyar el juego.	You're the Foreman! Thanks!
+Restaurar compras	Restore purchases
+Compras restauradas	Purchases restored
+No se pudo restaurar ahora	Couldn't restore now
+Todo lo que se compra también se puede ganar jugando. Los pagos los procesa la tienda de tu teléfono.	Everything can also be earned by playing. Payments are handled by your app store.
+Comprar	Buy
+¡x2 la 1.ª vez!	x2 first time!
+¡Gracias!	Thanks!
+La tienda no está disponible ahora	Store unavailable
+No se pudo completar la compra	Purchase failed
+¡Un mapa del tesoro!	Treasure map!
+Un minero va a cavar en la X	A miner will dig at the X
+¡Vamos!	Go!
+¡Tocalo!	Tap it!
+Meta cumplida  +	Goal done  +
+Turbo activo: mineros al doble	Boost on: miners x2
+¡Turbo! Mineros al doble por 2 minutos	Boost! Miners x2 for 2 min
+Te faltan gemas: las dan las metas y los barcos	Not enough gems
+Te faltan monedas para ampliar la isla	Not enough coins
+Expandir isla	Expand
+Buscando una veta	Looking for ore
+Va a picar	Going to mine
+¡Picando!	Mining!
+Lleva mineral al depósito	Hauling ore
+Va a comer	Going to eat
+Comiendo	Eating
+Va a ducharse	Going to shower
+En la ducha	Showering
+Durmiendo una siesta	Napping
+Corre a ayudar en la obra	Off to build
+¡Martillando!	Hammering!
+Va a la X del tesoro	Going to the X
+¡Cavando!	Digging!
+Llegando a la isla	Arriving
+Energía	Energy
+Limpieza	Clean
+Rinde 	Output 
+  ¡Fresco!	  Fresh!
+  Turbo	  Boost
+Amigo de 	Friends with 
+ (+10 % juntos)	 (+10% together)
+Todavía sin amigos: trabajando juntos se hacen amigos	No friends yet
+¡GOLEM DE ROCA!	ROCK GOLEM!
+¡VETA GIGANTE!	GIANT ORE!
+¡Ya construiste todo! Mejorá tus edificios.	All built! Upgrade your buildings.
+Máximo	Max
+Mejorar  	Upgrade  
+ minero	 miner
+Precio x	Price x
+Comen 	Eat 
+¡Fresco! 	Fresh! 
+Golpe x	Hit x
+ por minuto	 per min
+Vetas raras x	Rare ores x
+Barcos cada 	Ships every 
+Guarda 	Stores 
+ materias primas	 raw
+Ganancia sin conexión: 	Offline: 
+Experiencia +	XP +
+Descanso x2 y comen x1.5 más rápido	Rest x2, eat x1.5 faster
+Cobran las minas solas cada 	Auto-collect every 
+Tren cada 	Train every 
+Vende al 80 % del valor	Sells at 80%
+¡Hola de nuevo!	Welcome back!
+Mientras no estabas, tus mineros juntaron	While you were away
+x2 gratis	x2 free
+x2 (3 gemas)	x2 (3 gems)
+Sí	On
+No	Off
+Sonido	Sound
+Música	Music
+Vibración	Vibration
+Ahorro de batería	Battery saver
+Idioma	Language
+Construí el Faro	Build the Lighthouse
+Construí el Galpón	Build the Barn
+Construí el Mercado	Build the Market
+Construí el Muelle	Build the Dock
+Construí la Cantina	Build the Canteen
+Construí la Fundición	Build the Foundry
+Construí la Herrería	Build the Smithy
+Construí la Mina de carbón	Build the Coal Mine
+Construí las Duchas	Build the Showers
+Tito	Tito
+Coco	Coco
+Lola	Lola
+Pancho	Pancho
+Nina	Nina
+Beto	Beto
+Rulo	Rulo
+Pepa	Pepa
+Toto	Toto
+Chola	Chola
+Lalo	Lalo
+Mona	Mona
+Quique	Quique
+Rita	Rita
+Reducir movimiento	Reduce motion
+Minero de Piedra	Stone Miner
+Minero de Cobre	Copper Miner
+Minero de Hierro	Iron Miner
+Minero de Carbón	Coal Miner
+Minero de Oro	Gold Miner
+Minero de Cristal	Crystal Miner
+Minero de Diamante	Diamond Miner
+Minero de Minerales Raros	Rare Ore Miner
+Minero Maestro	Master Miner
+Pica piedra	Mines stone
+Pica cobre	Mines copper
+Pica hierro	Mines iron
+Pica carbón	Mines coal
+Pica oro	Mines gold
+Pica cristales	Mines crystals
+Pica diamantes	Mines diamonds
+Pica minerales raros	Mines rare ore
+Pica cualquier mineral	Mines any ore
+Cuartel de mineros	Miner Barracks
+Cada habitación trae un minero especialista.	Each room brings a specialist miner.
+Habitaciones	Rooms
+Cuartel 	Barracks 
+Subí el Cuartel	Upgrade Barracks
+Llevala al Cuartel	Drag it to the Barracks
+Mineral raro	Rare ore
+Sala central	Main Hall
+El corazón del complejo	Heart of the complex
+Dormitorio	Dorm
+Trae a su especialista	Brings its specialist
+Pasillo	Hallway
+Conecta habitaciones	Connects rooms
+Descarga	Unloader
+Los mineros descargan acá	Miners unload here
+Junta y suma valor	Stacks and adds value
+Trituradora	Crusher
+Más piedra, cobre y hierro	More stone, copper and iron
+Mineral a lingote	Ore to bars
+Pulidora	Polisher
+Gemas y cristales valen más	Gems and crystals worth more
+Tesorería	Treasury
+Vende la vagoneta	Sells the cart
+Bóveda	Vault
+Guarda gemas: da diamantes	Stores gems: gives diamonds
+Generador	Generator
+Da energía con carbón	Coal power
+Cristales +25 % con energía	Crystals +25% with power
+Taladro	Drill
+Saca mineral raro solo	Mines rare ore by itself
+Herramientas	Tool Bench
+Vecinos pican +10 %	Neighbors mine +10%
+Comedor	Mess Hall
+Descansan mejor	Better rest
+Aula	Classroom
+El Maestro enseña	The Master teaches
+Escalera	Stairs
+Sube un piso	Goes up a floor
+Observatorio	Observatory
+Ve venir los meteoritos	Sees meteors coming
+Palomar	Dovecote
+Contratos +20 %	Contracts +20%
+Molino	Windmill
+Energía sin carbón	Power without coal
+Desvío	Splitter
+Divide una línea en dos	Splits a line in two
+Sala secreta	Secret Room
+¿Qué habrá adentro?	What's inside?
+Cámara experimental	Experiment Chamber
+Mineral experimental x4	Experimental ore x4
+Trofeos	Trophies
+Recuerdos del complejo	Complex memories
+Imán de vetas	Ore Magnet
+Más vetas en la isla	More ore on the island
+Reloj	Clock
+Contratos +1 min	Contracts +1 min
+Laboratorio portátil	Portable Lab
+Cristales +25 %	Crystals +25%
+Horno portátil	Portable Oven
+Fundiciones +30 %	Foundries +30%
+Campana de fiesta	Party Bell
+Mineros contentos	Happy miners
+Forja legendaria	Legendary Forge
+Sala del tesoro	Treasure Room
+Biblioteca	Library
+Cocina minera	Miners' Kitchen
+Mirador	Lookout
+Línea perfecta	Perfect Line
+Cuarteto	Quartet
+Taller de herreros	Smiths' Shop
+Energía verde	Green Power
+Topo en casa	Mole at Home
+Noche eterna	Endless Night
+Mejorar	Upgrade
+20 min	20 min
+Sin lugar	No room
+Se habilita con el Cuartel nivel 	Unlocks at Barracks level 
+No hay lugar: subí el Cuartel	No room: upgrade the Barracks
+ lugares	 spots
+Planos 	Blueprints 
+Evolucionar: 	Evolve: 
+Mejorando 	Upgrading 
+Adornos	Decorations
+Solo decoran: suman belleza a la isla	Just for looks: adds island beauty
+Sinergias: 	Synergies: 
+Sin energía	No power
+Con energía	Powered
+Sin acceso	No access
+Le gusta tener al lado:	Likes having next door:
+Se va en 	Leaves in 
+¡Se rompió una máquina!	A machine broke!
+¡Llegó un comerciante al Cuartel!	A merchant came to the Barracks!
+¡Fiesta en el comedor!	Party in the mess hall!
+¡Visita del inspector!	Inspector visit!
+¡Se trabó una vagoneta!	A cart got stuck!
+Ya va el especialista	The specialist is on the way
+¡Va el especialista a arreglarla!	The specialist is going to fix it!
+Lo que se vende cerca de él: +50 %	Sales near him: +50%
+¡El inspector dejó cofres!	The inspector left chests!
+No hay quien sepa arreglarla	Nobody can fix it
+Se arregla sola en 3 min, o ya:	Fixes itself in 3 min, or now:
+Los contratos llegan con el Cuartel nivel 6 y una Descarga	Contracts come at Barracks level 6 with an Unloader
+Contratos	Contracts
+ hoy	 today
+Vuelven pronto	More soon
+Aceptar	Accept
+Ya hay un contrato en curso	A contract is already running
+No quedan contratos hoy	No contracts left today
+¡Contrato cumplido!	Contract done!
+El contrato venció. Llegan otros	Contract expired. More are coming
+Libro de combinaciones	Combo Book
+¡Combinación! 	Combo! 
+¡Habitación nueva!	New room!
+ antes de tiempo	 early
+¡Mejora gratis!	Free upgrade!
+Una habitación subió de etapa	A room leveled up
+Lo guardaba el que la construyó	Left by its builder
+Un tesoro escondido	A hidden treasure
+ sinergia	 synergy
+Una habitación al frente	One room in front
+Atrás + Descarga, Pasillo y Tesorería	Back + Unloader, Hallway and Treasury
+Laterales + Almacén, Trituradora y Comedor	Sides + Storage, Crusher and Mess Hall
+Esquinas + Fundición y Generador	Corners + Foundry and Generator
+¡Segundo piso! + Laboratorio y Escalera	Second floor! + Lab and Stairs
+Más arriba + Pulidora, Bóveda y Aula; contratos	Higher + Polisher, Vault and Classroom; contracts
+Patio exterior + Taladro, Molino y Desvío	Outer yard + Drill, Windmill and Splitter
+Segundo piso completo + Palomar	Full second floor + Dovecote
+¡Torres! + Observatorio	Towers! + Observatory
+Necesita más lugar alrededor: movelo	Needs more room around: move it
+: se terminó	: time's up
+¡Plano secreto!	Secret blueprint!
+ (portátil)	 (portable)
+Te faltan monedas o materiales	Not enough coins or materials
+Minero Topo	Mole Miner
+Pica todo de abajo	Mines everything from below
+Minero Fantasma	Ghost Miner
+De noche pica el doble	Mines double at night
+Arrastralo: se imanta solo	Drag it: it snaps into place
+Pase	Pass
+Museo	Museum
+Zarpar	Set sail
+El comerciante se mudó de puerta	The merchant moved doors
+¡El Observatorio ve meteoritos en camino!	The Observatory spots incoming meteors!
+Privacidad	Privacy
+Política	Policy
+Términos	Terms
+Probabilidades	Odds
+No se pudo abrir ahora	Couldn't open it right now
+
+# Presentacion de Old Gus (primera partida)
+¡Mirá quién llegó! Soy el Viejo Gus, el último minero de esta isla.	Well, look who made it! I'm Old Gus, the last miner on this island.
+Dicen que esta roca esconde las vetas más ricas del mar: oro, cristales... ¡hasta diamantes!	Folks say this rock hides the richest veins in the whole sea: gold, crystals... even diamonds!
+La vieja cuadrilla se fue hace años. Pero vos tenés un pico y yo tengo la experiencia.	The old crew left years ago. But you've got a pick, and I've got the know-how.
+Devolvámosle la vida a esta isla. ¡Empezá tocando esa roca!	Let's bring this island back to life. Start by tapping that rock!
+Viejo Gus	Old Gus
+Tocá para seguir	Tap to continue
+Saltar	Skip
+Arrastrá al minero a tu isla	Drag your miner onto the island
+Soltala donde quieras	Drop it anywhere
+Galpón lleno: se vendió 	Barn full, sold 
+Cofre lleno	Chest full
+ está terminado. ¡Vení a verlo!	 is finished. Come see it!
+El cofre de tus mineros se llenó: después de esto no juntan más.	Your miners' chest is full. They stop collecting until you come back.
+Obras terminadas y cofre lleno	Finished builds and a full chest
+¡YACIMIENTO LEGENDARIO! Pagá x5	LEGENDARY DEPOSIT! Pays x5
+¡Yacimiento legendario! +10 gemas y cofre de oro	Legendary deposit! +10 gems and a gold chest
+¡Mirá quién llegó! Soy el Viejo Gus. Esta isla esconde oro, cristales... ¡hasta diamantes!	Well, look who made it! I'm Old Gus. This island hides gold, crystals... even diamonds!
+Vos tenés el pico. ¡Empezá tocando esa roca!	You've got the pick. Start by tapping that rock!
+ estrena equipo!	 gets new gear!
+¡La tierra nueva escondía un Yacimiento legendario!	The new land was hiding a legendary deposit!
+Hoy -40 %	Today -40%
+¡LEGENDARIO! x5	LEGENDARY! x5
+★ Fin de semana dorado: legendarios x3	★ Golden weekend: legendaries x3
+¡Fin de semana dorado! Más vetas gigantes y legendarios x3	Golden weekend! More giant veins and legendaries x3
+Fin de semana dorado	Golden weekend
+Hoy y mañana: más vetas gigantes y legendarios x3.	Today and tomorrow: more giant veins and legendaries x3.
+Cargando el anuncio…	Loading the ad…
+Ahora no hay anuncios disponibles. Probá en un rato	No ads available right now. Try again in a bit
+Constructores 	Builders 
+  ·  Ayuntamiento 	  ·  Town Hall 
+No hay nada nuevo acá: subí el Ayuntamiento.	Nothing new here: upgrade the Town Hall.
+Salen frescos (+30 %). Uno por vez: los demás hacen cola	They come out fresh (+30%). One at a time: the rest wait in line
+Comen acá (dos a la vez) y descansan mejor al lado	They eat here (two at a time) and rest better next door
+No queda lugar: ampliá la isla	No room left: expand the island

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Exportador de prueba del kit de arte: compila SOLO el generador de mallas (Assets/Scripts/Art/Gen, sin UnityEngine)
+       y exporta cada accesorio a .obj/.mtl para rasterizarlo con render_preview.py. No necesita Unity ni licencia. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="../../unity_miner/Assets/Scripts/Art/Gen/*.cs" />
+  </ItemGroup>
+</Project>

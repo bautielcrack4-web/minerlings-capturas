@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Compila todos los scripts del proyecto Unity contra las DLL del editor instalado (sin licencia ni ejecucion). -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>CS0649;CS0414;CS0169</NoWarn>
+    <UnityManaged>/opt/unity/6000.0.84f1/Editor/Data/Managed</UnityManaged>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../unity_miner/Assets/**/*.cs" />
+    <Reference Include="$(UnityManaged)/UnityEngine/*.dll" Private="false" />
+    <Reference Include="/opt/unity/6000.0.84f1/Editor/Data/Resources/PackageManager/ProjectTemplates/libcache/com.unity.template.3d-cross-platform-17.0.12/ScriptAssemblies/UnityEngine.UI.dll" Private="false" />
+    <!-- paquetes del proyecto (compras, servicios, AdMob): las DLL que Unity ya compilo en Library -->
+    <Reference Include="../../unity_miner/Library/ScriptAssemblies/Unity.*.dll" Exclude="../../unity_miner/Library/ScriptAssemblies/Unity.*Editor*.dll" Private="false" />
+    <Reference Include="../../unity_miner/Library/ScriptAssemblies/UnityEngine.Purchasing*.dll" Private="false" />
+    <Reference Include="../../unity_miner/Library/PackageCache/com.google.ads.mobile@*/GoogleMobileAds/*.dll" Private="false" />
+    <Reference Include="../../unity_miner/Library/PackageCache/com.unity.nuget.newtonsoft-json@*/Runtime/*.dll" Private="false" />
+  </ItemGroup>
+</Project>

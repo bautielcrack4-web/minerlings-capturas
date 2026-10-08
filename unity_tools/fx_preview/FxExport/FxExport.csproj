@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Exporta las texturas generadas y los parametros de todos los efectos (FxSpecs) para la vista previa en Python. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../unity_miner/Assets/Scripts/Fx/FxTexGen.cs" />
+    <Compile Include="../../../unity_miner/Assets/Scripts/Fx/FxSpecs.cs" />
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,17 @@
+# Reglas propias para el reductor de codigo (R8).
+# El puente de AdMob para Unity trae codigo para el SDK "NextGen", que este juego no usa (usa el SDK estandar):
+# sin esto, R8 falla por clases que no estan.
+-dontwarn com.google.android.libraries.ads.mobile.sdk.**
+-keep class com.google.unity.ads.** { *; }
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.android.ump.** { *; }
+# In-App Review de Google Play (se llama por JNI desde Monetization/Reviews.cs: R8 no ve el uso)
+-keep class com.google.android.play.core.review.** { *; }
+-keep class com.google.android.gms.tasks.** { *; }
+# Compras (Unity IAP 5 + Google Play Billing): Unity las llama por JNI desde C#, R8 no ve el uso y las borraba
+# ("La tienda no está disponible ahora" en la version de Play).
+-keep class com.android.billingclient.** { *; }
+-keep class com.android.vending.billing.** { *; }
+-keep class com.unity.purchasing.** { *; }
+-keep class com.unity3d.services.** { *; }
+-keep class com.unity.services.** { *; }
