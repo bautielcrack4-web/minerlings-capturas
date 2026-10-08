@@ -207,7 +207,8 @@ namespace Mineros.IslandView
                         float s2 = 0.85f / foot;
                         r2.transform.localScale = Vector3.one * s2;
                         r2.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
-                        r2.transform.localPosition = new Vector3(AnnexX - b.center.z * s2, SlabH - b.min.y * s2, ModW * 0.5f + 0.6f + b.center.x * s2);
+                        r2.transform.localPosition = new Vector3(AnnexX + 0.4f - b.center.z * s2,   // en la parte que asoma, no detras de la sala
+                             SlabH - b.min.y * s2, ModW * 0.5f + 0.6f + b.center.x * s2);
                     }
                 }
             }
