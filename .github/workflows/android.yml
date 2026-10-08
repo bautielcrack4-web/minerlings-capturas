@@ -11,6 +11,11 @@ name: Unity Android
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: "AAB con anuncios REALES (version para produccion)"
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -93,7 +98,7 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
           # mientras se prueba (prueba interna) el AAB lleva anuncios de PRUEBA: cargan siempre y el dueÃ±o los puede tocar.
           # Los REALES solo con "[release]" en el mensaje del commit (la version que va a produccion).
-          ADMOB_TEST: ${{ contains(github.event.head_commit.message, '[release]') && '0' || '1' }}
+          ADMOB_TEST: ${{ inputs.release && '0' || '1' }}
         run: |
           echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
           export CM_KEYSTORE_PATH="$RUNNER_TEMP/upload.jks"
