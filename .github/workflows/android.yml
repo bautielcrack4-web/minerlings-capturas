@@ -1,0 +1,123 @@
+# Compila Minerlings (Unity 6, unity_miner/) para Android en un runner Linux de GitHub:
+#   - APK de prueba (anuncios de PRUEBA de Google) para instalar en el telefono.
+#   - AAB firmado con la clave de subida (anuncios REALES) para Google Play.
+# Se dispara con un push a la rama de trabajo cuyo mensaje tenga "[build]", o a mano (Actions â†’ Run workflow).
+# El AAB lleva anuncios de PRUEBA salvo que el mensaje tenga tambien "[release]" (version para produccion).
+#
+# Secretos del repo (Settings â†’ Secrets and variables â†’ Actions):
+#   UNITY_EMAIL, UNITY_PASSWORD      cuenta de Unity (licencia Personal). Los carga el dueÃ±o; nunca van en el chat.
+#   ANDROID_KEYSTORE_BASE64          clave de subida (upload.jks en base64), ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS
+name: Unity Android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+    # concurrencia en el job (no en el workflow): un push sin [build] queda en "skipped" y no cancela un build en curso
+    concurrency:
+      group: unity-android
+      cancel-in-progress: true
+    timeout-minutes: 150
+    env:
+      UNITY_VERSION: 6000.0.84f1
+      UNITY: /opt/unity/6000.0.84f1/Editor/Unity
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Liberar disco (Unity + Android ocupan ~15 GB)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Dependencias del sistema
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libarchive-tools cpio xvfb libglu1-mesa libgtk-3-0 libnss3 libgbm1 libxss1 libasound2 >/dev/null
+          sudo mkdir -p /opt/unity && sudo chown -R "$USER" /opt/unity
+
+      - name: Editor de Unity
+        run: |
+          test -n "$UNITY_EMAIL" || { echo "::error::Falta el secreto UNITY_EMAIL"; exit 1; }
+          bash unity_tools/install_unity.sh
+          LIC="$HOME/.local/share/unity3d/Unity/Unity_lic.ulf"
+          if [ ! -s "$LIC" ]; then
+            echo "Activacion por el cliente de licencias..."
+            /opt/unity/$UNITY_VERSION/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client \
+              --activate-ulf --username "$UNITY_EMAIL" --password "$UNITY_PASSWORD" 2>&1 | grep -viE "password" | tail -20 || true
+          fi
+          ls -la "$HOME/.local/share/unity3d/Unity/" 2>/dev/null || true
+
+      - name: Modulo de Android (SDK 36, NDK r27c, OpenJDK 17)
+        run: bash unity_tools/install_android.sh
+
+      - name: Cache de Library (importacion)
+        uses: actions/cache@v4
+        with:
+          path: unity_miner/Library
+          key: library-android-${{ hashFiles('unity_miner/Packages/packages-lock.json', 'unity_miner/ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: library-android-
+
+      - name: APK de prueba
+        run: |
+          xvfb-run -a "$UNITY" -batchmode -nographics -projectPath unity_miner -buildTarget Android \
+            -executeMethod BuildAndroid.Apk -buildOut Builds/Minerlings.apk -quit -logFile - 2>&1 | tee apk.log | \
+            grep -E "error CS|Exception|monetizacion|Build (succeeded|failed)|BUILD|ERROR" | head -80
+          test -s unity_miner/Builds/Minerlings.apk
+
+      - name: Capturas para la tienda y de control (inglÃ©s, 2x)
+        continue-on-error: true
+        env:
+          SHOT_SCALE: "2"
+          LOC_LANG: en
+        run: |
+          mkdir -p shots
+          # ruta ABSOLUTA: Unity resuelve las relativas desde unity_miner/. Sin GPU cada captura tarda ~8 min: solo las de tienda
+          for s in isla_show mineros_album isla_eventos_gigante isla_ajustes; do
+            bash unity_tools/unity_shot.sh "$s" "$PWD/shots" || true
+          done
+          ls -la shots | head -60
+
+      - name: AAB firmado para Google Play
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          CM_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          CM_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          CM_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          BUILD_NUMBER: ${{ github.run_number }}
+          # mientras se prueba (prueba interna) el AAB lleva anuncios de PRUEBA: cargan siempre y el dueÃ±o los puede tocar.
+          # Los REALES solo con "[release]" en el mensaje del commit (la version que va a produccion).
+          ADMOB_TEST: ${{ contains(github.event.head_commit.message, '[release]') && '0' || '1' }}
+        run: |
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          export CM_KEYSTORE_PATH="$RUNNER_TEMP/upload.jks"
+          xvfb-run -a "$UNITY" -batchmode -nographics -projectPath unity_miner -buildTarget Android \
+            -executeMethod BuildAndroid.Aab -buildOut Builds/Minerlings.aab -quit -logFile - 2>&1 | tee aab.log | \
+            grep -E "error CS|Exception|monetizacion|Build (succeeded|failed)|BUILD|ERROR" | head -80
+          test -s unity_miner/Builds/Minerlings.aab
+          rm -f "$RUNNER_TEMP/upload.jks"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: minerlings-android
+          retention-days: 14
+          if-no-files-found: ignore
+          path: |
+            unity_miner/Builds/Minerlings.apk
+            unity_miner/Builds/Minerlings.aab
+            apk.log
+            aab.log
+            shots/
+
+      - name: Devolver la licencia
+        if: always()
+        run: |
+          /opt/unity/$UNITY_VERSION/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client \
+            --return-ulf --username "$UNITY_EMAIL" --password "$UNITY_PASSWORD" 2>&1 | tail -3 || true
