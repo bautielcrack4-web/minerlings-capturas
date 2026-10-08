@@ -24,29 +24,47 @@ namespace Mineros.IslandView
         public float LastPanT = -99f;
 
         /// <summary>
-        /// Lleva la camara suave hasta que `world` quede en el centro (se cancela si el jugador arrastra). `auto` = no la
-        /// pidio el jugador (tutorial, eventos): no se mueve si el jugador acaba de mover la camara (auditoria final: en el
-        /// tutorial la camara "se iba sola" mientras uno la arrastraba). `screenY` = altura de pantalla donde queda.
+        /// Camara como en los juegos de gestion buenos (pedido del dueño: "los movimientos automaticos rapidos molestan"):
+        /// la camara es del jugador. Nada la mueve si lo que importa ya se ve. Si quedo fuera de la zona util (o debajo
+        /// de una hoja abierta), se corre lo MINIMO para que entre, despacio y con freno suave; si el jugador toca la
+        /// pantalla, se corta. `auto` = lo pide un evento (veta gigante, tesoro, golem): esos nunca mueven la camara,
+        /// avisan con un cartel en el borde que se toca para ir. `screenY` > 0.6 = hay un cajon abajo: la zona util
+        /// empieza mas arriba.
         /// </summary>
         public void FocusOn(Vector3 world, bool auto = false, float screenY = 0.45f)
         {
-            if (auto && Time.unscaledTime - LastPanT < 4f) return;
+            if (auto) return;
+            Reveal(world, screenY > 0.6f ? screenY - 0.2f : 0.2f);
+        }
+
+        /// <summary>Lo trae a la vista si no se ve (tutorial y botones del jugador). `minY` = borde inferior util (0-1).</summary>
+        public void Reveal(Vector3 world, float minY = 0.2f)
+        {
             Vector3 c = new Vector3(world.x, 0f, world.z);
             float b = BoundR;
             if (c.magnitude > b) c = c.normalized * b;
-            // si ya esta bastante centrado no se mueve (evita mareo)
-            Vector3 now = ScreenToGround(new Vector2(Cam.pixelWidth * 0.5f, Cam.pixelHeight * screenY));
-            if ((new Vector3(now.x, 0, now.z) - c).magnitude < 2.2f) return;
-            focusTo = camRig.position + (c - new Vector3(now.x, 0f, now.z));
+            Vector3 vp = Cam.WorldToViewportPoint(c + Vector3.up * 1.2f);
+            float x0 = 0.14f, x1 = 0.86f, y0 = minY, y1 = 0.82f;
+            if (vp.z > 0f && vp.x >= x0 && vp.x <= x1 && vp.y >= y0 && vp.y <= y1) return;   // ya se ve: quieto
+            // el punto mas cercano de la zona util (un poco hacia adentro, para que no quede pegado al borde)
+            float tx = Mathf.Clamp(vp.x, x0 + 0.08f, x1 - 0.08f), ty = Mathf.Clamp(vp.y, y0 + 0.08f, y1 - 0.08f);
+            Vector3 from = ScreenToGround(new Vector2(vp.x * Cam.pixelWidth, vp.y * Cam.pixelHeight));
+            Vector3 to = ScreenToGround(new Vector2(tx * Cam.pixelWidth, ty * Cam.pixelHeight));
+            Vector3 d = from - to; d.y = 0f;
+            focusTo = camRig.position + d;
             focusing = true;
+            focusV = Vector3.zero;
             vel = Vector3.zero;
         }
+
+        Vector3 focusV;
 
         bool UpdateFocus(float dt)
         {
             if (!focusing) return false;
-            camRig.position = Vector3.Lerp(camRig.position, focusTo, 1f - Mathf.Exp(-dt * 4.5f));
-            if ((camRig.position - focusTo).sqrMagnitude < 0.004f) focusing = false;
+            // freno suave (amortiguado critico, ~0.55 s): arranca y llega sin tirones
+            camRig.position = Vector3.SmoothDamp(camRig.position, focusTo, ref focusV, 0.32f, 40f, dt);
+            if ((camRig.position - focusTo).sqrMagnitude < 0.0025f) focusing = false;
             return true;
         }
 

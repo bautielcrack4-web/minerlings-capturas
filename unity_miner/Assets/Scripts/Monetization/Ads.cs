@@ -24,6 +24,19 @@ namespace Mineros.Monetization
         /// <summary>Hay un anuncio listo para mostrar (o estamos en el editor).</summary>
         public static bool Ready { get { return Simulated || (loaded != null && loaded.CanShowAd()); } }
 
+        /// <summary>Estado para el HUD de FPS (5 toques en las monedas): depurar anuncios en el telefono.</summary>
+        public static string Status
+        {
+            get
+            {
+                if (Simulated) return "simulado";
+                if (!started) return "sin iniciar";
+                if (!initDone) return "esperando consentimiento" + (LastError != "" ? " (" + LastError + ")" : "");
+                if (Ready) return "LISTO";
+                return (loading ? "cargando" : "sin anuncio") + (LastError != "" ? " (" + LastError + ")" : "") + " fallos " + fails;
+            }
+        }
+
         /// <summary>Ultimo error de carga (para el cartel y para depurar en el telefono).</summary>
         public static string LastError = "";
         static int fails;

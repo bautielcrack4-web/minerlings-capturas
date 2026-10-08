@@ -87,7 +87,7 @@ namespace Mineros.IslandView
         {
             adWaiting = true;
             float t0 = Time.unscaledTime;
-            while (!Ads.Ready && Time.unscaledTime - t0 < 8f) yield return null;
+            while (!Ads.Ready && Time.unscaledTime - t0 < 15f) yield return null;
             adWaiting = false;
             if (Ads.Ready) show();
             else Toast(Loc.T("Ahora no hay anuncios disponibles. Probá en un rato") + (string.IsNullOrEmpty(Ads.LastError) ? "" : " (" + Ads.LastError + ")"), Kit.Gray, null, true);
@@ -117,6 +117,33 @@ namespace Mineros.IslandView
             if (adChestBtn.gameObject.activeSelf != show) { adChestBtn.gameObject.SetActive(show); if (show) Tw.Pop(adChestBtn.transform, 1.3f); }
             if (show && !adChestBtn.IsPressed && Time.unscaledTime > adChestBtn.QuietUntil)
                 adChestBtn.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(Time.time * 2f) * 2f);
+        }
+
+        // ------------------------------------------------------------ giros guardados
+        Btn spinBtn;
+        Text spinN;
+
+        /// <summary>Giros de ruleta guardados (se cerro la ruleta sin usarlos): boton violeta con el numero, abre la ruleta.</summary>
+        void UpdateSpinButton()
+        {
+            bool show = Isl.TutDone && Isl.Spins > 0 && sheet == null && !Isl.BalloonHere;
+            if (spinBtn == null)
+            {
+                spinBtn = Kit.HitArea(hudLayer, 76, 76, "Giros");
+                Kit.Place((RectTransform)spinBtn.transform, 0f, 1f, 26f, -356f, 76, 76);
+                var box = Kit.RoundImg(spinBtn.transform, 24, Kit.Purple, "Caja");
+                Kit.Stretch(box.rectTransform);
+                var ic = Kit.Icon(box.transform, "star", 46);
+                Kit.PlaceTL((RectTransform)ic.transform, 15, 10, 46, 46);
+                var badge = Kit.RoundImg(box.transform, 14, Kit.Red, "Numero");
+                Kit.PlaceTL(badge.rectTransform, 48, -8, 36, 30);
+                spinN = Kit.Label(badge.transform, "1", 20, Color.white, 4, true, TextAnchor.MiddleCenter);
+                Kit.Stretch(spinN.rectTransform);
+                spinBtn.Clicked += OpenWheel;
+                spinBtn.gameObject.SetActive(false);
+            }
+            if (spinBtn.gameObject.activeSelf != show) { spinBtn.gameObject.SetActive(show); if (show) Tw.Pop(spinBtn.transform, 1.3f); }
+            if (show) spinN.text = Isl.Spins.ToString();
         }
 
         // ------------------------------------------------------------ tienda
@@ -337,6 +364,7 @@ namespace Mineros.IslandView
         void UpdateShopUi()
         {
             UpdateAdChest();
+            UpdateSpinButton();
             CheckStarterOffer();
         }
     }

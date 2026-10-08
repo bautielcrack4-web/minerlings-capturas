@@ -148,7 +148,7 @@ namespace Mineros.IslandView
 
         void StartAdsLater()
         {
-            Mineros.UI.Tw.After(this, "anuncios", 20f, () =>
+            Mineros.UI.Tw.After(this, "anuncios", 3f, () =>
             {
 #if UNITY_IOS && !UNITY_EDITOR
                 // iOS: el permiso de seguimiento (ATT) se pide despues de jugar un rato, nunca al abrir

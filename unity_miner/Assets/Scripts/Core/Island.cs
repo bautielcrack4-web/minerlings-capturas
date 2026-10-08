@@ -1242,7 +1242,7 @@ namespace Mineros.Core
             {
                 { "v", 5 }, { "cx", ComplexObj() }, { "coins", Coins }, { "earned", TotalEarned }, { "plots", plots }, { "mined", mined },
                 { "gems", Gems }, { "expand", Expand }, { "goal", GoalIdx }, { "seen", LastSeen }, { "stats", StatsObj() },
-                { "spins", Spins }, { "chests", ChestsObj() }, { "day", DayClock },
+                { "spins", Spins }, { "spinstreak", SpinStreak }, { "chests", ChestsObj() }, { "day", DayClock },
                 { "miners", MinersObj() }, { "found", FoundObj() }, { "daily", DailyObj() }, { "prog", ProgressObj() },
                 { "city", CityObj() }, { "tut", (int)Tut }, { "shop", ShopObj() },
             });
@@ -1289,6 +1289,7 @@ namespace Mineros.Core
             GoalIdx = JsonRead.Int(d, "goal", 0);
             LastSeen = JsonRead.Dbl(d, "seen", 0);
             Spins = JsonRead.Int(d, "spins", 0);
+            SpinStreak = JsonRead.Int(d, "spinstreak", 0);
             DayClock = (float)JsonRead.Dbl(d, "day", DayLength * 0.06f) % DayLength;
             object dl;
             if (d.TryGetValue("daily", out dl) && dl is Dictionary<string, object> dd) LoadDaily(dd);

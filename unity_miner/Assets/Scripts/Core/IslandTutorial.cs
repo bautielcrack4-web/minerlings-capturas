@@ -25,7 +25,7 @@ namespace Mineros.Core
             switch (Tut)
             {
                 case TutStep.TapRock: if (Stat("tap_breaks") >= 1) next = TutStep.WatchMiner; break;
-                case TutStep.WatchMiner: if (Stat("rocks") >= 3) next = TutStep.UpgradeHouse; break;
+                case TutStep.WatchMiner: if (Stat("rocks") >= 3 || Stat("miner_taps") >= 1) next = TutStep.UpgradeHouse; break;   // tocarlo cierra el paso
                 case TutStep.UpgradeHouse: { var h = Find(BKind.House); if (h != null && (h.Work > 0 || h.Level >= 2)) next = TutStep.FinishWork; break; }
                 case TutStep.FinishWork: if (Level(BKind.House) >= 2) next = TutStep.BuildSawmill; break;
                 case TutStep.BuildSawmill: if (Find(BKind.Sawmill) != null) next = TutStep.CollectWood; break;

@@ -643,6 +643,12 @@ namespace Mineros.IslandView
                 giantMark = Kit.MakeTag(worldLayer, giant.Boss ? Loc.T("¡GOLEM DE ROCA!") : giant.Legendary ? Loc.T("¡LEGENDARIO! x5") : Loc.T("¡VETA GIGANTE!"),
                     giant.Boss ? new Color(0.55f, 0.5f, 0.5f) : giant.Legendary ? new Color(0.25f, 0.6f, 0.95f) : Kit.Orange, 24);
                 Tw.Pop(giantMark, 1.5f);
+                // la camara ya no salta sola hasta la veta: el cartel (pegado al borde si no se ve) se toca para ir
+                var gi = giantMark.GetComponent<Image>();
+                if (gi != null) gi.raycastTarget = true;
+                var gb = giantMark.gameObject.AddComponent<Btn>();
+                var g0 = giant;
+                gb.Clicked += () => game.Reveal(new Vector3(g0.X, 0f, g0.Z));
             }
             Vector2 c = ToCanvas(new Vector3(giant.X, 4.6f, giant.Z));
             Vector2 cs = Kit.CanvasSize;
@@ -710,7 +716,7 @@ namespace Mineros.IslandView
             {
                 tutFocusT = Time.unscaledTime + 2.5f;
                 tutFocusAt = target.Value;
-                game.FocusOn(target.Value, true);
+                game.Reveal(target.Value);
             }
             handRT.anchoredPosition = new Vector2(c.x, -c.y);
             // la pista nunca se corta en el borde de la pantalla

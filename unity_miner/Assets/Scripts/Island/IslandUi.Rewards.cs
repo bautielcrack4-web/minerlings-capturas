@@ -157,13 +157,36 @@ namespace Mineros.IslandView
         {
             var st = IslandStage.I;
             var fr = OpenSheet(1000, true);
-            sheetLocked = true;
+            sheetLocked = false;   // se puede cerrar (✕) cuando no gira: los giros quedan guardados para despues
             Kit.LabelAt(fr, Loc.T("Ruleta del Mercader"), 42, Kit.Brown, 0, true, 0, 22, 680, 56, TextAnchor.MiddleCenter);
+            // medidor del premio mayor: 5 casilleros, el quinto giro es grande seguro
+            var meter = Kit.New("Medidor", fr);
+            Kit.Place(meter, 0.5f, 0f, -200f, 84f, 400, 40);
+            var pips = new Image[Island.JackpotEvery];
+            for (int i = 0; i < pips.Length; i++)
+            {
+                pips[i] = Kit.RoundImg(meter, 9, new Color(0.85f, 0.78f, 0.66f), "Casilla");
+                Kit.PlaceTL(pips[i].rectTransform, 8 + i * 62, 6, 52, 26);
+            }
+            var jack = Kit.LabelAt(fr, "", 22, Kit.Purple, 0, true, 0, 126, 680, 30, TextAnchor.MiddleCenter);
+            System.Action paintMeter = () =>
+            {
+                int on = Mathf.Clamp(Isl.SpinStreak, 0, Island.JackpotEvery);
+                for (int i = 0; i < pips.Length; i++)
+                    pips[i].color = i < on ? Kit.Purple : i == pips.Length - 1 ? new Color(1f, 0.83f, 0.35f) : new Color(0.85f, 0.78f, 0.66f);
+                int left = Island.JackpotEvery - on;
+                jack.text = left <= 1 ? Loc.T("¡El próximo giro es PREMIO MAYOR!") : Loc.T("Premio mayor seguro en ") + left + Loc.T(" giros");
+            };
+            paintMeter();
             st.ShowWheel();
             var raw = Kit.New("Ruleta", fr).gameObject.AddComponent<RawImage>();
             raw.texture = st.Tex;
-            raw.raycastTarget = false;
-            Kit.Place(raw.rectTransform, 0.5f, 0f, -320f, 80f, 640, 640);
+            raw.raycastTarget = true;
+            Kit.Place(raw.rectTransform, 0.5f, 0f, -280f, 160f, 560, 560);
+            // tocar la ruleta mientras gira la frena (de verdad); quieta, tocarla es girar
+            var tapWheel = raw.gameObject.AddComponent<Btn>();
+            tapWheel.Juice = false;
+            tapWheel.PlaySound = false;
             var prize = Kit.LabelAt(fr, "", 40, Kit.OrangeD, 0, true, 0, 724, 680, 60, TextAnchor.MiddleCenter);
             var b = Kit.Button(fr, "", Kit.Green, 38, 400, 110);
             Kit.Place((RectTransform)b.transform, 0.5f, 0f, -200f, 800f, 400, 110);
@@ -172,9 +195,9 @@ namespace Mineros.IslandView
             System.Action paint = () =>
             {
                 if (state == 0) b.Label.text = Isl.Spins > 0 ? Loc.T("¡GIRAR!") + (Isl.Spins > 1 ? "  x" + Isl.Spins : "") : Loc.T("Sin giros");
-                else if (state == 1) b.Label.text = "...";
+                else if (state == 1) b.Label.text = Loc.T("¡FRENAR!");
                 else b.Label.text = Isl.Spins > 0 ? Loc.T("Girar otra vez") : Loc.T("¡Genial!");
-                b.Interactable = state != 1 && (state == 2 || Isl.Spins > 0);
+                b.Interactable = state == 1 || state == 2 || Isl.Spins > 0;
             };
             paint();
             st.SpinDone = () =>
@@ -192,12 +215,15 @@ namespace Mineros.IslandView
                     if (coins > 0) FlyCoins(new Vector2(0f, 120f), 6);
                     Juice.Vibrate(50);
                     if (w.Kind == "giant") Toast(Loc.T("¡Mirá el cielo!"), Kit.Orange);
+                    if (Island.IsBigPrize(w)) { Flash(new Color(1f, 0.9f, 0.5f), 0.3f); Mineros.Fx.Haptics.Heavy(); Sfx.Play("milestone", -4f); }
                 }
+                paintMeter();
                 game.Save();
                 paint();
             };
-            b.Clicked += () =>
+            System.Action go = () =>
             {
+                if (state == 1) { st.Hurry(); return; }
                 if (state == 2 && Isl.Spins <= 0) { CloseSheet(); return; }
                 if (state == 2) { state = 0; prize.text = ""; }
                 int idx = Isl.Spin();
@@ -207,6 +233,8 @@ namespace Mineros.IslandView
                 st.Spin(idx);
                 paint();
             };
+            b.Clicked += go;
+            tapWheel.Clicked += () => { if (state == 1 || Isl.Spins > 0) go(); };
             sheetRefresh.Add(paint);
         }
 

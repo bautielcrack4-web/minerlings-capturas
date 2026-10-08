@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Mineros.Audio;
 using Mineros.Core;
 using UnityEngine;
@@ -15,7 +16,8 @@ namespace Mineros.IslandView
     public sealed partial class IslandGame
     {
         public const float ZoomMin = 5f, ZoomMax = 25f;   // isla mas grande y mineros mas chicos: mas rango
-        const float TapSlop = 16f;          // pixeles de referencia (a 1544 de alto) para que cuente como toque
+        const float TapSlop = 16f;
+        const float MinerTapZoom = 11.5f;   // mas lejos que esto, tocar un minero no abre su tarjeta          // pixeles de referencia (a 1544 de alto) para que cuente como toque
 
         bool dragging, pinching, overUi;
         Vector3 dragAnchor;                  // punto del suelo bajo el dedo al empezar
@@ -40,13 +42,73 @@ namespace Mineros.IslandView
             comboT -= dt;
             if (comboT <= 0f && combo > 0f) { ComboEnded((int)combo); combo = 0f; }
             bool blocked = Ui != null && Ui.BlocksWorld;
-            if (blocked) { dragging = pinching = false; }
-            else if (Input.touchCount >= 2) Pinch();
-            else if (Input.touchCount == 1) OneTouch(Input.GetTouch(0), dt);
-            else Mouse(dt);
+            if (blocked) { dragging = pinching = false; oreFingers.Clear(); }
+            else if (Input.touchCount > 0) Touches(dt);
+            else { oreFingers.Clear(); Mouse(dt); }
             if (!dragging && !pinching && !PlaceHeld) Coast(dt);
             UpdatePlace(dt);
             Cam.orthographicSize = Mathf.Lerp(Cam.orthographicSize, zoomTarget, 1f - Mathf.Exp(-dt * 14f));
+        }
+
+        // ------------------------------------------------------------ varios dedos
+        // Multitoque (pedido del dueño: "con la veta gigante quiero tocar con 2 o 3 dedos rapido"): cada dedo que
+        // APOYA sobre una veta la pica en el momento (como los clickers buenos), sin esperar a que se levante, y ese
+        // dedo queda fuera de la camara. Los demas dedos arrastran o pellizcan como siempre.
+        readonly HashSet<int> oreFingers = new HashSet<int>();
+        readonly Dictionary<int, Vector2> oreDown = new Dictionary<int, Vector2>();
+        readonly List<Touch> freeTouches = new List<Touch>();
+
+        void Touches(float dt)
+        {
+            freeTouches.Clear();
+            int n = Input.touchCount;
+            for (int i = 0; i < n; i++)
+            {
+                var t = Input.GetTouch(i);
+                int id = t.fingerId;
+                if (t.phase == TouchPhase.Began && place == null && !ComplexMode && !OverUi(id))
+                {
+                    var o = OreAt(t.position);
+                    if (o != null)
+                    {
+                        TapOre(o, t.position);
+                        oreFingers.Add(id);
+                        oreDown[id] = t.position;
+                        continue;
+                    }
+                }
+                if (oreFingers.Contains(id))
+                {
+                    if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled) { oreFingers.Remove(id); continue; }
+                    // un solo dedo que empezo en una veta y se arrastra lejos: pasa a mover la camara
+                    if (n == 1 && t.phase == TouchPhase.Moved && Vector2.Distance(t.position, oreDown[id]) * 1544f / Mathf.Max(Cam.pixelHeight, 1) > 40f)
+                    {
+                        oreFingers.Remove(id);
+                        Begin(t.position, false);
+                        dragDist = TapSlop;   // ya no es un toque
+                    }
+                    else continue;
+                }
+                freeTouches.Add(t);
+            }
+            if (freeTouches.Count >= 2) Pinch(freeTouches[0], freeTouches[1]);
+            else if (freeTouches.Count == 1) OneTouch(freeTouches[0], dt);
+            else { dragging = false; pinching = false; }
+        }
+
+        /// <summary>Veta bajo el punto de pantalla (la gigante tiene un blanco mas grande).</summary>
+        OreView OreAt(Vector2 screen)
+        {
+            float px = Cam.pixelHeight / 1544f;
+            OreView bestO = null; float bd = 70f * px;
+            foreach (var v in ores.Values)
+            {
+                float sz = Island.Ores[v.O.Kind].Size * (v.O.Giant ? 2.8f : 1f);
+                Vector2 sp = Cam.WorldToScreenPoint(v.T.position + Vector3.up * sz * 0.5f);
+                float d = Vector2.Distance(screen, sp) - (v.O.Giant ? 60f * px : 0f);
+                if (d < bd) { bd = d; bestO = v; }
+            }
+            return bestO;
         }
 
         // ------------------------------------------------------------ un dedo / mouse
@@ -58,7 +120,7 @@ namespace Mineros.IslandView
                 case TouchPhase.Began: Begin(t.position, OverUi(t.fingerId)); break;
                 case TouchPhase.Moved:
                 case TouchPhase.Stationary: Move(t.position, dt); break;
-                case TouchPhase.Ended: End(t.position); break;
+                case TouchPhase.Ended: End(t.position, true); break;
                 case TouchPhase.Canceled: dragging = false; break;
             }
         }
@@ -118,13 +180,13 @@ namespace Mineros.IslandView
             if (dt > 0f) vel = Vector3.Lerp(vel, (camRig.position - before) / dt, 0.5f);
         }
 
-        void End(Vector2 p)
+        void End(Vector2 p, bool touch = false)
         {
             if (PlaceHeld) { PlaceRelease(); return; }
             bool was = dragging;
             dragging = false;
             if (!was || overUi) return;
-            if (dragDist < TapSlop) { vel = Vector3.zero; Tap(p); }
+            if (dragDist < TapSlop) { vel = Vector3.zero; Tap(p, touch); }
         }
 
         /// <summary>Mueve la camara para que el punto `ground` quede bajo la posicion de pantalla `p`.</summary>
@@ -156,9 +218,8 @@ namespace Mineros.IslandView
         float pinchDist;
         Vector3 pinchAnchor;
 
-        void Pinch()
+        void Pinch(Touch t0, Touch t1)
         {
-            var t0 = Input.GetTouch(0); var t1 = Input.GetTouch(1);
             Vector2 mid = (t0.position + t1.position) * 0.5f;
             float d = Mathf.Max(Vector2.Distance(t0.position, t1.position), 1f);
             if (!pinching || t0.phase == TouchPhase.Began || t1.phase == TouchPhase.Began)
@@ -215,7 +276,8 @@ namespace Mineros.IslandView
         }
 
         // ------------------------------------------------------------ toques en el mundo
-        void Tap(Vector2 screen)
+        /// <param name="oresDone">con el dedo, las vetas ya se picaron al apoyar (Touches): no picar dos veces</param>
+        void Tap(Vector2 screen, bool oresDone = false)
         {
             float px = Cam.pixelHeight / 1544f;
             if (place != null) { PlaceTapTo(screen); return; }   // colocando: tocar el suelo lo lleva ahi
@@ -224,7 +286,7 @@ namespace Mineros.IslandView
             if (Isl.BalloonHere && Ambient.BalloonVisible)
             {
                 Vector2 bp = Cam.WorldToScreenPoint(Ambient.BalloonPos + Vector3.up * 1.2f);
-                if (Vector2.Distance(screen, bp) < 130f * px)
+                if (Vector2.Distance(screen, bp) < 95f * px)
                 {
                     Isl.TapBalloon();
                     Ui.OpenWheel();
@@ -242,17 +304,12 @@ namespace Mineros.IslandView
                 if (Vector2.Distance(screen, bs) < 100f * px) { Isl.OpenBottle(); return; }
             }
             // 1) vetas: el jugador ayuda a picar (con combo)
-            OreView bestO = null; float bd = 70f * px;
-            foreach (var v in ores.Values)
-            {
-                float sz = Island.Ores[v.O.Kind].Size * (v.O.Giant ? 2.8f : 1f);
-                Vector2 sp = Cam.WorldToScreenPoint(v.T.position + Vector3.up * sz * 0.5f);
-                float d = Vector2.Distance(screen, sp) - (v.O.Giant ? 60f * px : 0f);
-                if (d < bd) { bd = d; bestO = v; }
-            }
-            if (bestO != null) { TapOre(bestO, screen); return; }
+            OreView bestO = OreAt(screen);
+            if (bestO != null) { if (!oresDone) TapOre(bestO, screen); return; }
             // 2) mineros: tarjeta
-            MinerView bestM = null; float bm = 60f * px;
+            // de lejos los mineros son puntitos: tocarlos abria la tarjeta sin querer (pedido del dueño). Solo con zoom
+            // de cerca, y con un blanco mas justo.
+            MinerView bestM = null; float bm = Cam.orthographicSize > MinerTapZoom && Isl.TutDone ? -1f : (Isl.TutDone ? 48f : 80f) * px;
             foreach (var mv in miners.Values)
             {
                 Vector2 sp = Cam.WorldToScreenPoint(mv.Model.transform.position + Vector3.up * MH(1.1f));
@@ -263,7 +320,10 @@ namespace Mineros.IslandView
             {
                 Juice.Punch(bestM.Model.transform, 0.18f, 0.25f);
                 Sfx.Play("ui", -4f, 1.3f);
-                MinerSays(bestM.M);   // salta y contesta segun como esta (13)
+                bool tut = Isl.Tut == Island.TutStep.WatchMiner;
+                Isl.AddStat("miner_taps", 1);
+                if (tut) { bestM.Celebrate = 0.8f; Ui.Popup(bestM.Model.transform.position + Vector3.up * MH(2.5f), Loc.T("¡Yo pico solo mientras construís!"), Color.white, 28); }
+                else MinerSays(bestM.M);   // salta y contesta segun como esta (13)
                 Ui.ShowMiner(bestM.M);
                 return;
             }
@@ -288,6 +348,7 @@ namespace Mineros.IslandView
             Sfx.Play("ui", -6f);
             Juice.Punch(best.Root, 0.08f, 0.2f);
             if (best.P.Building < 0 && !Isl.Offered(best.P)) return;
+            if (Ui.TapCollect(best.P)) return;   // tiene algo listo: tocar el edificio COBRA (el panel, con el segundo toque)
             Ui.OpenPlot(best.P);
         }
 

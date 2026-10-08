@@ -32,8 +32,15 @@ namespace Mineros.Core
         public readonly int[] Chests = new int[4];   // madera, plata, oro, legendario
         public bool BalloonHere;
         public float BalloonLeft;             // segundos que le quedan al globo en la isla
-        float balloonT = 50f;
+        float balloonT = 240f;   // el primero a los 4 min de juego (antes 50 s: aparecia "todo el tiempo")
         public int PendingPrize = -1;
+
+        /// <summary>
+        /// Medidor del premio mayor: cada giro suma uno y el giro numero `JackpotEvery` cae seguro en un premio grande
+        /// (lo que hace que se quiera volver a girar). Se vacia con cualquier premio grande, salga cuando salga.
+        /// </summary>
+        public int SpinStreak;
+        public const int JackpotEvery = 5;
 
         public event Action BalloonCame;
         public event Action<bool> BalloonGone;   // true = el jugador lo toco
@@ -80,7 +87,7 @@ namespace Mineros.Core
             BalloonCame?.Invoke();
         }
 
-        float NextBalloon() { return (float)(150 + rng.NextDouble() * 80); }
+        float NextBalloon() { return (float)(480 + rng.NextDouble() * 240); }   // cada 8-12 min: escaso, se espera
 
         /// <summary>El jugador toca el globo: regala un giro y se va.</summary>
         public bool TapBalloon()
@@ -107,6 +114,12 @@ namespace Mineros.Core
             double r = rng.NextDouble() * sum;
             int idx = Wheel.Length - 1;
             for (int i = 0; i < Wheel.Length; i++) { r -= Wheel[i].Weight; if (r <= 0) { idx = i; break; } }
+            if (SpinStreak >= JackpotEvery - 1)
+            {
+                // giro del premio mayor: uno de los grandes, al azar
+                int[] big = Giant != null ? new[] { 6, 7 } : new[] { 5, 6, 7 };
+                idx = big[rng.Next(big.Length)];
+            }
             // si ya hay una veta gigante, la de oro se cambia por la montaña de monedas
             if (Wheel[idx].Kind == "giant" && Giant != null) idx = 4;
             PendingPrize = idx;
@@ -121,6 +134,7 @@ namespace Mineros.Core
             PendingPrize = -1;
             Spins--;
             AddStat("spins", 1);
+            SpinStreak = IsBigPrize(w) ? 0 : SpinStreak + 1;
             switch (w.Kind)
             {
                 case "coins": { double v = CoinPrize(w.Amount); Earn(v); return v; }
@@ -131,6 +145,8 @@ namespace Mineros.Core
             }
             return 0;
         }
+
+        public static bool IsBigPrize(WheelPrize w) { return w.Kind == "giant" || (w.Kind == "chest" && w.Amount >= 2) || (w.Kind == "gems" && w.Amount >= 5); }
 
         // ------------------------------------------------------------ cofres
         public void GiveChest(int tier)

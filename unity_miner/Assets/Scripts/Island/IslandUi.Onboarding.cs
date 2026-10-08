@@ -68,7 +68,7 @@ namespace Mineros.IslandView
                     target = NearestOre(); hint = Loc.T("¡Tocá la roca para picar!");
                     break;
                 case Island.TutStep.WatchMiner:
-                    if (Isl.Miners.Count > 0) { target = game.MinerWorld(Isl.Miners[0]) + Vector3.up * 0.6f; hint = Loc.T("¡Tu minero también pica solo!"); }
+                    if (Isl.Miners.Count > 0) { target = game.MinerWorld(Isl.Miners[0]) + Vector3.up * 0.6f; hint = Loc.T("¡Tocá a tu minero!"); }
                     break;
                 case Island.TutStep.UpgradeHouse:
                     if (house != null && Isl.CanUpgrade(house)) { target = game.PlotWorld(house) + Vector3.up * (game.PlotHeight(house) * 0.5f); hint = Loc.T("¡Mejorá la casa!"); }

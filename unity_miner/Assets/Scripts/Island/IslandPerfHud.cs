@@ -25,7 +25,7 @@ namespace Mineros.IslandView
             rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
             rt.pivot = new Vector2(0f, 1f);
             rt.anchoredPosition = new Vector2(20f, -200f);
-            rt.sizeDelta = new Vector2(340, 90);
+            rt.sizeDelta = new Vector2(520, 130);
             go.SetActive(PlayerPrefs.GetInt("isla_perf", 0) == 1);
             return h;
         }
@@ -54,7 +54,7 @@ namespace Mineros.IslandView
             tmp.Sort();
             float low = tmp[Mathf.Clamp(Mathf.CeilToInt(c * 0.99f) - 1, 0, c - 1)];
             label.text = (c / Mathf.Max(sum, 1e-4f)).ToString("0") + " FPS\n1% bajo " + (1f / Mathf.Max(low, 1e-4f)).ToString("0")
-                + " · peor " + (worst * 1000f).ToString("0") + " ms";
+                + " · peor " + (worst * 1000f).ToString("0") + " ms\nanuncio: " + Mineros.Monetization.Ads.Status;
             label.color = c / sum >= 55f ? new Color(0.6f, 1f, 0.6f) : c / sum >= 40f ? new Color(1f, 0.9f, 0.4f) : new Color(1f, 0.5f, 0.45f);
         }
     }

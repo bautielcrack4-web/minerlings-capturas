@@ -776,3 +776,9 @@ No hay nada nuevo acá: subí el Ayuntamiento.	Nothing new here: upgrade the Tow
 Salen frescos (+30 %). Uno por vez: los demás hacen cola	They come out fresh (+30%). One at a time: the rest wait in line
 Comen acá (dos a la vez) y descansan mejor al lado	They eat here (two at a time) and rest better next door
 No queda lugar: ampliá la isla	No room left: expand the island
+¡Tocá a tu minero!	Tap your miner!
+¡Yo pico solo mientras construís!	I dig on my own while you build!
+¡El próximo giro es PREMIO MAYOR!	Next spin is a JACKPOT!
+Premio mayor seguro en 	Jackpot in 
+ giros	 spins
+¡FRENAR!	STOP!

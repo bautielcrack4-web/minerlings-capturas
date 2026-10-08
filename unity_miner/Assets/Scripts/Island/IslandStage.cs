@@ -373,6 +373,8 @@ namespace Mineros.IslandView
                 nearTo = target + side * 0.38f * seg;
                 nearT = 0f;
             }
+            spinDur = 4.6f;
+            hurried = false;
             spinFrom = wheelAngle;
             float baseTo = Mathf.Ceil((spinFrom + 360f * 5f) / 360f) * 360f;
             spinTo = baseTo + target + jitter;
@@ -554,6 +556,28 @@ namespace Mineros.IslandView
             }
             if (mode == Mode.Wheel && wheel != null) UpdateWheel(dt, t);
             if (mode == Mode.Chest && chestBody != null) UpdateChest(dt, t);
+        }
+
+        bool hurried;
+
+        /// <summary>
+        /// El jugador toco mientras gira: frena YA, de verdad (antes no pasaba nada). Mismo premio y mismo lugar de
+        /// llegada, pero las vueltas que faltaban se cortan: menos de una vuelta y ~0.8 s de frenado fuerte.
+        /// </summary>
+        public void Hurry()
+        {
+            if (spinT < 0f || hurried) return;
+            float left = spinTo - wheelAngle;
+            if (left < 200f) return;   // ya esta frenando: dejarlo terminar
+            hurried = true;
+            float to = spinTo - Mathf.Floor((left - 120f) / 360f) * 360f;   // mismo angulo final, entre 120 y 480 grados por delante
+            spinFrom = wheelAngle;
+            nearFrom -= spinTo - to; nearTo -= spinTo - to;
+            spinTo = to;
+            spinT = 0f;
+            spinDur = 0.85f;
+            Sfx.Play("down", -8f, 1.3f);
+            Mineros.Fx.Haptics.Light();
         }
 
         void UpdateWheel(float dt, float t)

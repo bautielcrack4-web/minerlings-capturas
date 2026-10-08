@@ -272,6 +272,16 @@ namespace Mineros.IslandView
             }
         }
 
+        /// <summary>Toque sobre un edificio con algo listo: cobra (como tocar su burbuja). Devuelve false si no habia nada.</summary>
+        public bool TapCollect(Plot p)
+        {
+            Btn bb;
+            if (p == null || p.Ready <= 0 || p.ReadyRes < 0 || p.Work > 0 || !bubbleMarks.TryGetValue(p.Id, out bb) || bb == null || !bb.gameObject.activeSelf) return false;
+            swipeChain = 0;
+            CollectFrom(p, bb, false);
+            return true;
+        }
+
         void CollectFrom(Plot p, Btn b, bool chained)
         {
             if (p.Ready <= 0) return;
