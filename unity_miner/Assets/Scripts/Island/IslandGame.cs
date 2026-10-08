@@ -140,6 +140,7 @@ namespace Mineros.IslandView
             scaffoldMesh = IslandArt.Scaffold(out scaffoldMats);
             Ambient = gameObject.AddComponent<IslandAmbient>();
             Ambient.Init(this, root);
+            InitFar();   // isla lejana, niebla y balsa
             IslandStage.Create(transform);
             Ui = gameObject.AddComponent<IslandUi>();   // antes que los mineros: AddMiner usa la UI
             Ui.Init(this);
@@ -470,6 +471,7 @@ namespace Mineros.IslandView
             var v = new OreView { O = o, T = t, Vis = r.transform, GlintT = Random.value * 3f, Rend = r };
             ores[o.Id] = v;
             if (o.Age < 0.1f && !o.Sky && !o.Giant) v.Mound = MakeMound(t);
+            if (o.Far) t.localScale = Vector3.one * OreScale(o);   // roca exclusiva de la isla lejana
             if (o.Giant)
             {
                 t.localScale = Vector3.one * (o.Legendary ? 3.5f : 2.8f);
@@ -483,7 +485,7 @@ namespace Mineros.IslandView
             OreView v;
             if (!ores.TryGetValue(o.Id, out v)) return;
             v.Shake = 1f;
-            float sz = Island.Ores[o.Kind].Size * (o.Giant ? (o.Legendary ? 3.5f : 2.8f) : 1f);
+            float sz = Island.Ores[o.Kind].Size * OreScale(o);
             Vector3 at = v.T.position + Vector3.up * sz * 0.6f;
             FxApi.Play("hit_spark", at, default(Color), o.Giant ? 1.4f : 0.9f);
             if (Random.value < 0.5f) FxApi.Play("chips", at, IslandArt.OreCol[o.Kind], 0.7f);
@@ -679,7 +681,7 @@ namespace Mineros.IslandView
                 float perf = Isl.Perf(m);
                 // el paso va con el tamaño: un minero mas chico da mas pasos por metro
                 if (m.Moving) mv.Phase += dt * 11f * perf * Isl.WalkMult(m) * (1.3f / MinerScale) * 0.8f;
-                float swing = m.State == MState.Mining ? Mathf.Repeat(m.HitT / Island.HitInterval + 0.38f, 1f)
+                float swing = m.State == MState.Mining || (m.State == MState.FarWork && !m.Moving) ? Mathf.Repeat(m.HitT / Island.HitInterval + 0.38f, 1f)
                     : m.State == MState.Digging ? Mathf.Repeat(m.HitT / 0.6f, 1f)
                     : m.State == MState.Building ? Mathf.Repeat(m.HitT / 0.45f + m.Id * 0.3f, 1f) : -1f;   // cavar y martillar
                 mv.BlinkT -= dt;
@@ -730,6 +732,7 @@ namespace Mineros.IslandView
             float dt = Mathf.Min(Time.deltaTime, 0.1f);
             Isl.Tick(dt);
             UpdateOres(dt);
+            UpdateFar(dt);
             UpdatePlots(dt);
             UpdateCity(dt);
             UpdateMiners(dt);
@@ -751,7 +754,7 @@ namespace Mineros.IslandView
             foreach (var v in ores.Values)
             {
                 var o = v.O;
-                float size = Island.Ores[o.Kind].Size * (o.Giant ? 2.8f : 1f);
+                float size = Island.Ores[o.Kind].Size * OreScale(o);
                 float y, sq;
                 if (o.Giant || o.Sky || v.Mound == null && o.Age >= 0.85f)
                 {

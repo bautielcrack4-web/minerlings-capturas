@@ -28,7 +28,7 @@ namespace Mineros.IslandView
             if (got < 0) return;
             bool crit = Isl.LastCrit, broke = Isl.LastBroke;
             lastTapScreen = screen;
-            float sz = Island.Ores[v.O.Kind].Size * (v.O.Giant ? 2.8f : 1f);
+            float sz = Island.Ores[v.O.Kind].Size * OreScale(v.O);
             Vector3 at = v.T.position + Vector3.up * (sz + 0.4f);
             lastTapWorld = at;
             // el objeto acusa el golpe: aplastado, destello blanco, esquirlas del color del mineral
@@ -60,7 +60,7 @@ namespace Mineros.IslandView
         {
             OreView v;
             if (o == null || !ores.TryGetValue(o.Id, out v)) return false;
-            float sz = Island.Ores[o.Kind].Size * (o.Giant ? 2.8f : 1f);
+            float sz = Island.Ores[o.Kind].Size * OreScale(o);
             Vector2 sp = Cam.WorldToScreenPoint(v.T.position + Vector3.up * sz * 0.5f);
             TapOre(v, sp);
             return true;

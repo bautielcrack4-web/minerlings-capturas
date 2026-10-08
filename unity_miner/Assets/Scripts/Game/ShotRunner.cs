@@ -468,6 +468,7 @@ namespace Mineros.Game
             g.Ui.CloseSheet();
             for (int f = 0; f < 30; f++) yield return null;
             Snap("cofre_anuncio");
+            yield return FarShots(g);
             // obra nueva en vivo: colocacion, y despues terminarla para ver la revelacion
             isl.Plots[0].Level = 9;
             isl.BonusBuilders = 8;
@@ -1724,6 +1725,78 @@ namespace Mineros.Game
         }
 
         static IEnumerator Wait(float s) { return new WaitForSecondsRealtime(s); }
+
+        /// <summary>Adelanta la simulacion `secs` segundos de juego de golpe (los cuadros en la nube son lentos).</summary>
+        static void Advance(Island isl, float secs) { for (float t = 0f; t < secs; t += 0.1f) isl.Tick(0.1f); }
+
+        /// <summary>
+        /// Isla lejana: niebla con candado (sin Muelle), "?" (con Muelle), descubrimiento, la balsa a las 6:00, el cruce,
+        /// la cuadrilla picando con barras de vida, la roca fijada y la balsa grande (8 asientos).
+        /// </summary>
+        IEnumerator FarShots(Mineros.IslandView.IslandGame g)
+        {
+            var isl = g.Isl;
+            Vector3 far = g.FarCenter;
+            Vector3 dir = far.normalized;
+            g.Ui.CloseSheet();
+            g.DebugLook(dir * (Island.FarDist - 16f), 15f);
+            for (int f = 0; f < 20; f++) yield return null;
+            Snap("lejana_niebla_candado");
+            var dp = isl.Find(BKind.Dock);
+            if (dp == null)
+            {
+                isl.Coins = 1e9; for (int i = 0; i < isl.Stock.Length; i++) isl.Stock[i] = Mathf.Max(isl.Stock[i], 300);
+                isl.BonusBuilders = 6;
+                var fp = isl.Plots.Find(p => isl.Allowed(BKind.Dock, p));
+                if (fp != null) { isl.Build(BKind.Dock, fp); isl.FinishAllWork(); }
+                dp = isl.Find(BKind.Dock);
+            }
+            if (dp == null) { Debug.Log("lejana: SIN MUELLE"); yield break; }
+            isl.Plots[0].Level = Mathf.Max(isl.Plots[0].Level, 9);
+            while (dp.Level < 4 && isl.Upgrade(dp)) isl.FinishAllWork();
+            for (int f = 0; f < 30; f++) yield return null;
+            Snap("lejana_niebla_pregunta");
+            bool ok = isl.TryDiscoverFar();
+            yield return Wait(2.6f);
+            g.DebugLook(far, 11f);
+            for (int f = 0; f < 10; f++) yield return null;
+            Snap("lejana_descubierta");
+            Debug.Log("lejana descubierta=" + ok + " rocas=" + isl.FarRockCount + " asientos=" + isl.RaftSeats);
+            // 5:55 -> sale la balsa
+            isl.DayClock = Island.DayLength * 0.928f;
+            Advance(isl, 3f);
+            Vector3 home = new Vector3(isl.RaftX, 0f, isl.RaftZ);
+            g.DebugLook(home, 8f);
+            Advance(isl, 6f);
+            for (int f = 0; f < 10; f++) yield return null;
+            Snap("lejana_embarque");
+            Advance(isl, 40f);
+            Debug.Log("lejana balsa=" + isl.Raft + " cuadrilla=" + isl.Crew.Count);
+            Advance(isl, Island.RaftTrip * 0.5f);
+            g.DebugLook(new Vector3(isl.RaftX, 0f, isl.RaftZ), 9f);
+            for (int f = 0; f < 10; f++) yield return null;
+            Snap("lejana_cruce");
+            Advance(isl, Island.RaftTrip * 0.5f + 25f);
+            g.DebugLook(far, 8.5f);
+            for (int f = 0; f < 20; f++) yield return null;
+            Snap("lejana_picando");
+            Ore pick = isl.OreList.Find(o => o.Far && !o.Dead);
+            if (pick != null) { for (int i = 0; i < 25; i++) g.DebugTapOre(pick); }
+            Advance(isl, 8f);
+            for (int f = 0; f < 20; f++) yield return null;
+            Snap("lejana_fijada");
+            Debug.Log("lejana foco=" + isl.FarFocus + " balsa=" + isl.Raft + " hora=" + isl.Hour.ToString("0.0"));
+            // balsa de 8
+            while (dp.Level < 8 && isl.Upgrade(dp)) isl.FinishAllWork();
+            isl.DayClock = Island.DayLength * 0.66f;   // 19:00 -> vuelven
+            Advance(isl, 90f);
+            g.DebugLook(new Vector3(isl.RaftX, 0f, isl.RaftZ), 7f);
+            for (int f = 0; f < 20; f++) yield return null;
+            Snap("lejana_balsa8");
+            Debug.Log("lejana vuelta balsa=" + isl.Raft + " asientos=" + isl.RaftSeats + " viajes=" + isl.Stat("raft_trips"));
+            g.DebugLook(Vector3.zero, 15.2f);
+            yield return Wait(0.3f);
+        }
 
         /// <summary>Espera a que el corte de techos deje de moverse (con cuadros lentos el dt topeado lo frena), maximo 15 s.</summary>
         static IEnumerator RoofSettle(Mineros.IslandView.IslandGame g) { return RoofSettle(g, null, 0f); }

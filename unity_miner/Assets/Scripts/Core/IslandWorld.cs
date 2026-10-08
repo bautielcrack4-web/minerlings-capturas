@@ -193,7 +193,7 @@ namespace Mineros.Core
             int seen = 0;
             foreach (var o in OreList)
             {
-                if (o.Dead || o.Giant || o.NightCrystal || o.Kind >= 4 || o.Age < 1f) continue;
+                if (o.Dead || o.Giant || o.Far || o.NightCrystal || o.Kind >= 4 || o.Age < 1f) continue;
                 seen++;
                 if (rng.Next(seen) == 0) best = o;   // al azar entre las validas
             }

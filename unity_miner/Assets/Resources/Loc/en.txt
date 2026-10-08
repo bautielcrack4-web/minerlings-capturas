@@ -782,3 +782,7 @@ No queda lugar: ampliá la isla	No room left: expand the island
 Premio mayor seguro en 	Jackpot in 
  giros	 spins
 ¡FRENAR!	STOP!
+¡Isla descubierta! La balsa sale a las 6:00	Island discovered! The raft leaves at 6 AM
+¡La balsa zarpa a las 6:00!	The raft sets sail at 6 AM!
+Necesitás un Muelle para llegar	You need a Dock to get there
+Su balsa lleva mineros a la isla lejana (1 asiento por nivel). Y llegan barcos que pagan el triple.	Its raft takes miners to the far island (1 seat per level). Ships also pay 3x.

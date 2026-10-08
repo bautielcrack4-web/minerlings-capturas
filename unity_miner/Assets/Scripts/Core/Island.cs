@@ -23,7 +23,8 @@ namespace Mineros.Core
     /// <summary>Estados de la IA de un minero.</summary>
     public enum MState { Idle, ToOre, Mining, ToDepot, ToCanteen, Eating, ToShowers, Showering, Resting, Spawning, ToDig, Digging, ToBuild, Building,
         ToUnload, ToDorm, InDorm, ToFix, Fixing, Leaving,
-        ToRoom, InRoom, Queued }   // Plan Pueblo: comer/ducharse en habitaciones del Cuartel, con cola
+        ToRoom, InRoom, Queued,
+        ToRaft, OnRaft, FarWork }   // isla lejana: a la balsa, en la balsa, picando alla   // Plan Pueblo: comer/ducharse en habitaciones del Cuartel, con cola
 
     public sealed class BDef
     {
@@ -95,6 +96,7 @@ namespace Mineros.Core
         public bool Legendary;      // yacimiento legendario: raro a proposito, de gema, paga x5 y trae cofre de oro
         public int BossPhase;
         public bool NightCrystal;   // cristal nocturno: solo de noche, lo toca el jugador (los mineros no), se apaga al amanecer
+        public bool Far;            // roca exclusiva de la isla lejana (barra de vida, cientos de toques)
     }
 
     public sealed class Miner
@@ -147,7 +149,7 @@ namespace Mineros.Core
             D(BKind.Smithy, Loc.T("Herrería"), Loc.T("Picos más fuertes para todos. Fabrica picos y carretillas."), BFamily.Transform, 3, 12, 300, 260, 1.9, 1.5f),
             D(BKind.Mine, Loc.T("Mina de piedra"), Loc.T("Saca piedra sola y deja ingreso constante."), BFamily.Extraction, 1, 12, 700, 600, 1.85, 1.6f),
             D(BKind.Lighthouse, Loc.T("Faro"), Loc.T("Atrae vetas raras (oro y gemas) y más vetas gigantes."), BFamily.Commerce, 4, 8, 1500, 1400, 2.1, 1.2f),
-            D(BKind.Dock, Loc.T("Muelle"), Loc.T("Llegan barcos que pagan el triple por pedidos."), BFamily.Commerce, 3, 8, 1100, 1000, 2.0, 1.5f),
+            D(BKind.Dock, Loc.T("Muelle"), Loc.T("Su balsa lleva mineros a la isla lejana (1 asiento por nivel). Y llegan barcos que pagan el triple."), BFamily.Commerce, 3, 8, 1100, 1000, 2.0, 1.5f),
             D(BKind.Barn, Loc.T("Galpón"), Loc.T("Guarda las materias primas: piedra, madera, carbón, minerales."), BFamily.Town, 2, 15, 250, 220, 1.7, 1.5f),
             D(BKind.Warehouse, Loc.T("Almacén"), Loc.T("Guarda los productos: lingotes, herramientas, vidrio, joyas."), BFamily.Town, 2, 15, 400, 300, 1.7, 1.5f),
             D(BKind.CoalMine, Loc.T("Mina de carbón"), Loc.T("Saca carbón: el combustible de hornos y fundiciones."), BFamily.Extraction, 2, 12, 350, 300, 1.8, 1.5f),
@@ -419,9 +421,10 @@ namespace Mineros.Core
             if (spawnT <= 0f)
             {
                 spawnT = 2.2f;
-                if (OreList.Count < MaxOres()) SpawnOre(false);
+                if (OreList.Count - FarRockCount < MaxOres()) SpawnOre(false);
             }
             foreach (var m in Miners) TickMiner(m, dt);
+            TickFar(dt);
             SeparateMiners(dt);
             TickFriends(dt);
             if (TurboT > 0f) TurboT = Math.Max(0f, TurboT - dt);
@@ -716,6 +719,7 @@ namespace Mineros.Core
             double dmg = Math.Max(1.0, PickPower() * 0.6) * (1 + Math.Min(combo, 20) * 0.05);
             if (LastCrit) { dmg *= 3; AddStat("crits", 1); }
             if (FrenzyT > 0f) dmg *= 2;
+            if (o.Far) { AddStat("taps", 1); double fv = TapFar(o, dmg); OreHit?.Invoke(o, null); return fv; }   // roca de la isla lejana
             o.Hp -= dmg;
             AddStat("taps", 1);
             OreHit?.Invoke(o, null);
@@ -1017,6 +1021,11 @@ namespace Mineros.Core
                 case MState.Queued:
                     TickQueued(m, dt, perf);
                     break;
+                case MState.ToRaft:
+                case MState.OnRaft:
+                case MState.FarWork:
+                    TickFarMiner(m, dt, perf);
+                    break;
                 case MState.ToBuild:
                 case MState.Building:
                 {
@@ -1068,7 +1077,7 @@ namespace Mineros.Core
             for (int pass = 0; pass < 2 && best == null; pass++)
                 foreach (var o in OreList)
                 {
-                    if (o.Dead || o.Age < 0.6f || o.NightCrystal) continue;
+                    if (o.Dead || o.Age < 0.6f || o.NightCrystal || o.Far) continue;
                     if (o.Giant) { if (onGiant < 6) { best = o; break; } continue; }
                     if (pass == 0 && o.ClaimedBy >= 0 && o.ClaimedBy != m.Id && ClaimAlive(o)) continue;
                     if (pass == 1 && Heading(o, m) >= 2) continue;   // como mucho 2 por veta: si no hay, se espera en su zona
@@ -1128,11 +1137,11 @@ namespace Mineros.Core
             for (int i = 0; i < Miners.Count; i++)
             {
                 var a = Miners[i];
-                if (a.InComplex || a.State == MState.Spawning) continue;
+                if (a.InComplex || a.State == MState.Spawning || a.State == MState.OnRaft) continue;
                 for (int j = i + 1; j < Miners.Count; j++)
                 {
                     var b = Miners[j];
-                    if (b.InComplex || b.State == MState.Spawning) continue;
+                    if (b.InComplex || b.State == MState.Spawning || b.State == MState.OnRaft) continue;
                     float dx = b.X - a.X, dz = b.Z - a.Z;
                     float d2 = dx * dx + dz * dz;
                     if (d2 >= min * min) continue;
@@ -1256,7 +1265,7 @@ namespace Mineros.Core
             {
                 { "v", 5 }, { "cx", ComplexObj() }, { "coins", Coins }, { "earned", TotalEarned }, { "plots", plots }, { "mined", mined },
                 { "gems", Gems }, { "expand", Expand }, { "goal", GoalIdx }, { "seen", LastSeen }, { "stats", StatsObj() },
-                { "spins", Spins }, { "spinstreak", SpinStreak }, { "chests", ChestsObj() }, { "day", DayClock },
+                { "spins", Spins }, { "spinstreak", SpinStreak }, { "far", FarObj() }, { "chests", ChestsObj() }, { "day", DayClock },
                 { "miners", MinersObj() }, { "found", FoundObj() }, { "daily", DailyObj() }, { "prog", ProgressObj() },
                 { "city", CityObj() }, { "tut", (int)Tut }, { "shop", ShopObj() },
             });
@@ -1304,6 +1313,7 @@ namespace Mineros.Core
             LastSeen = JsonRead.Dbl(d, "seen", 0);
             Spins = JsonRead.Int(d, "spins", 0);
             SpinStreak = JsonRead.Int(d, "spinstreak", 0);
+            ReadFar(d);
             DayClock = (float)JsonRead.Dbl(d, "day", DayLength * 0.06f) % DayLength;
             object dl;
             if (d.TryGetValue("daily", out dl) && dl is Dictionary<string, object> dd) LoadDaily(dd);

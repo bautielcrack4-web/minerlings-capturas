@@ -41,8 +41,6 @@ namespace Mineros.IslandView
         public void Reveal(Vector3 world, float minY = 0.2f)
         {
             Vector3 c = new Vector3(world.x, 0f, world.z);
-            float b = BoundR;
-            if (c.magnitude > b) c = c.normalized * b;
             Vector3 vp = Cam.WorldToViewportPoint(c + Vector3.up * 1.2f);
             float x0 = 0.14f, x1 = 0.86f, y0 = minY, y1 = 0.82f;
             if (vp.z > 0f && vp.x >= x0 && vp.x <= x1 && vp.y >= y0 && vp.y <= y1) return;   // ya se ve: quieto

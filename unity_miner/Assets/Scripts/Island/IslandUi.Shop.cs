@@ -366,6 +366,7 @@ namespace Mineros.IslandView
             UpdateAdChest();
             UpdateSpinButton();
             UpdateMinerCard();
+            UpdateFarUi();
             CheckStarterOffer();
         }
     }

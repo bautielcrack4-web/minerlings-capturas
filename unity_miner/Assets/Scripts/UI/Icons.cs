@@ -638,6 +638,30 @@ namespace Mineros.UI
                         p.Line(tip + V(-sx * 4f, -sy * 4f) * k, c + V(sx * 4f, sy * 4f) * k, 3f * k, Color.white, true);
                     }
                     break;
+                case "sun":
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float a = Mathf.PI * 2f * i / 8f;
+                        Vector2 d = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+                        p.Line(c + d * 12f * k, c + d * 18f * k, 5f * k, Out, true);
+                        p.Line(c + d * 12f * k, c + d * 18f * k, 2.6f * k, H("ffd23a"), true);
+                    }
+                    p.OC(c, 9.5f * k, H("ffd23a"), 2.5f);
+                    break;
+                case "moon":
+                {
+                    Vector2[] mo = new Vector2[26];
+                    // media luna: arco de afuera por la izquierda y vuelta por el arco de adentro (circulo corrido a la derecha)
+                    for (int i = 0; i < 14; i++) { float a = Mathf.Lerp(60f, 300f, i / 13f) * Mathf.Deg2Rad; mo[i] = c + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 15f * k; }
+                    for (int i = 0; i < 12; i++) { float a = Mathf.Lerp(255f, 105f, i / 11f) * Mathf.Deg2Rad; mo[14 + i] = c + V(7f, 0f) * k + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 12f * k; }
+                    p.OPoly(mo, H("f2e6a0"), 2.5f);
+                    break;
+                }
+                case "flag":
+                    p.Line(c + V(-9, 17) * k, c + V(-9, -17) * k, 5.5f * k, Out, true);
+                    p.Line(c + V(-9, 17) * k, c + V(-9, -17) * k, 3f * k, H("c9c9c9"), true);
+                    p.OPoly(new[] { c + V(-8, -17) * k, c + V(15, -10) * k, c + V(-8, -2) * k }, H("e5484d"), 2.5f);
+                    break;
                 case "stamp":   // sello de hecho: disco verde con borde dentado y tilde blanco
                 {
                     Vector2[] st = new Vector2[32];

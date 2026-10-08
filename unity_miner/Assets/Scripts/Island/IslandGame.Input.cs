@@ -37,6 +37,26 @@ namespace Mineros.IslandView
 
         float BoundR { get { return Isl.Radius * 0.85f; } }
 
+        /// <summary>
+        /// Zona donde puede andar la camara: la isla (circulo) mas un pasillo por el mar hacia la isla lejana. Antes de
+        /// descubrirla, el pasillo llega hasta el borde de la niebla; despues, hasta la isla. Devuelve el punto permitido
+        /// mas cercano.
+        /// </summary>
+        Vector3 AllowedCam(Vector3 c)
+        {
+            c.y = 0f;
+            float b = BoundR;
+            Vector3 inDisc = c.magnitude > b ? c.normalized * b : c;
+            Vector3 dir = new Vector3(Island.FarX, 0f, Island.FarZ).normalized;
+            float len = Isl.FarFound ? Island.FarDist : Island.FarDist - Island.FarR - 10f;
+            float t = Mathf.Clamp(Vector3.Dot(c, dir), 0f, len);
+            Vector3 axis = dir * t;
+            Vector3 off = c - axis;
+            float w = Isl.FarFound && t > len - Island.FarR ? Island.FarR : 6f;
+            Vector3 inCap = off.magnitude > w ? axis + off.normalized * w : c;
+            return (inDisc - c).sqrMagnitude <= (inCap - c).sqrMagnitude ? inDisc : inCap;
+        }
+
         void UpdateInput(float dt)
         {
             comboT -= dt;
@@ -103,9 +123,9 @@ namespace Mineros.IslandView
             OreView bestO = null; float bd = 70f * px;
             foreach (var v in ores.Values)
             {
-                float sz = Island.Ores[v.O.Kind].Size * (v.O.Giant ? 2.8f : 1f);
+                float sz = Island.Ores[v.O.Kind].Size * OreScale(v.O);
                 Vector2 sp = Cam.WorldToScreenPoint(v.T.position + Vector3.up * sz * 0.5f);
-                float d = Vector2.Distance(screen, sp) - (v.O.Giant ? 60f * px : 0f);
+                float d = Vector2.Distance(screen, sp) - (v.O.Giant || v.O.Far ? 60f * px : 0f);
                 if (d < bd) { bd = d; bestO = v; }
             }
             return bestO;
@@ -169,12 +189,12 @@ namespace Mineros.IslandView
             Anchor(p, dragAnchor);
             // limite elastico mientras se arrastra: pasado el borde el movimiento rinde cada vez menos
             Vector3 c = camRig.position; c.y = 0f;
-            float m = c.magnitude, b = BoundR;
-            if (m > b)
+            Vector3 al = AllowedCam(c);
+            float over = (c - al).magnitude;
+            if (over > 0.001f)
             {
-                float over = m - b;
-                float soft = b + over / (1f + over * 0.35f);
-                camRig.position = c / m * soft;
+                float soft = over / (1f + over * 0.35f);
+                camRig.position = al + (c - al) / over * soft;
                 dragAnchor = ScreenToGround(p);   // el ancla se corre con el resorte para no "saltar" al volver
             }
             if (dt > 0f) vel = Vector3.Lerp(vel, (camRig.position - before) / dt, 0.5f);
@@ -205,10 +225,9 @@ namespace Mineros.IslandView
             vel *= Mathf.Exp(-dt * 4.5f);
             if (vel.sqrMagnitude < 0.0004f) vel = Vector3.zero;
             Vector3 c = camRig.position; c.y = 0f;
-            float m = c.magnitude, b = BoundR;
-            if (m > b)
+            Vector3 target = AllowedCam(c);
+            if ((target - c).sqrMagnitude > 1e-6f)
             {
-                Vector3 target = c / m * b;
                 camRig.position = Vector3.Lerp(c, target, 1f - Mathf.Exp(-dt * 9f));
                 vel *= 0.6f;
             }
@@ -293,6 +312,7 @@ namespace Mineros.IslandView
                     return;
                 }
             }
+            if (TapFarFog(screen)) return;   // la isla lejana tapada por niebla
             // 0b) bichos y botella: duran poco, van primero
             if (TapCritter(screen)) return;
             if (TapBoard(screen)) return;
