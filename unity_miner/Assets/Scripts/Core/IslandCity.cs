@@ -233,6 +233,33 @@ namespace Mineros.Core
             return l;
         }
 
+        /// <summary>
+        /// Que hace falta fabricar ahora (lo que pide el proximo Ayuntamiento, y para eso sus ingredientes): la simulacion
+        /// mostro que sin esta guia la Herreria hacia 101 picos con todo el hierro y nunca una carretilla, y el
+        /// Ayuntamiento quedaba trabado 40 minutos. Devuelve cuantas unidades faltan de cada cosa (0 = no hace falta).
+        /// </summary>
+        public int NeedFor(Res r)
+        {
+            if (Th >= MaxTh) return 0;
+            var need = new Dictionary<Res, int>();
+            foreach (var kv in MatsFor(BKind.Depot, Th + 1)) AddNeed(need, kv.Key, kv.Value - Stock[(int)kv.Key], 0);
+            int n;
+            return need.TryGetValue(r, out n) ? n : 0;
+        }
+
+        void AddNeed(Dictionary<Res, int> need, Res r, int missing, int depth)
+        {
+            if (missing <= 0 || depth > 3) return;
+            int had; need.TryGetValue(r, out had); need[r] = had + missing;
+            foreach (var rc in Recipes)
+            {
+                if (rc.Out != r) continue;
+                int batches = (missing + rc.OutN - 1) / Math.Max(1, rc.OutN);
+                for (int i = 0; i < rc.In.Length; i++) AddNeed(need, rc.In[i], rc.InN[i] * batches - Stock[(int)rc.In[i]], depth + 1);
+                break;
+            }
+        }
+
         public bool HasMats(List<KeyValuePair<Res, int>> mats)
         {
             foreach (var kv in mats) if (Stock[(int)kv.Key] < kv.Value) return false;
@@ -260,7 +287,7 @@ namespace Mineros.Core
         public int BusyBuilders()
         {
             int n = 0;
-            foreach (var p in Plots) if (p.Work > 0) n++;
+            foreach (var p in Plots) if (p.Work > 0 && p.Building != (int)BKind.Depot) n++;   // el Ayuntamiento tiene su maestro de obras
             return n;
         }
 

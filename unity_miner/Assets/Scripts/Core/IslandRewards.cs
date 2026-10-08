@@ -19,6 +19,7 @@ namespace Mineros.Core
         public float Turbo;
         public int Plans;                 // planos de Sala secreta (0.11)
         public int Portable = -1;         // ModKind de un modulo portatil
+        public int FxCard = -1;           // carta de efecto (a veces)
     }
 
     /// <summary>

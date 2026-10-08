@@ -161,6 +161,7 @@ namespace Mineros.IslandView
             string[] packs = { "gems_s", "gems_m", "gems_l", "gems_xl", "gems_xxl", "gems_xxxl" };
             var grid = Section(body, 2 * 250 + 20, "Gemas");
             for (int i = 0; i < packs.Length; i++) GemCell(grid, packs[i], 6 + (i % 3) * 212, (i / 3) * 256);
+            PackSection(body);   // sobres de cartas de efecto
             if (Isl.CanOffer("builder")) Offer(body, "builder", Loc.T("Constructor extra"), Loc.T("Para siempre"), Kit.Blue, 170);
             if (Isl.CanOffer("pass")) Offer(body, "pass", Loc.T("Pase dorado"), Loc.T("Temporada actual"), Kit.Orange, 170);
             if (Isl.CanOffer("capataz")) Offer(body, "capataz", Loc.T("Capataz (suscripción mensual)"), Loc.T("Se renueva cada mes · cancelás cuando quieras desde la tienda"), Kit.Green, 200);
@@ -367,6 +368,7 @@ namespace Mineros.IslandView
             UpdateSpinButton();
             UpdateMinerCard();
             UpdateFarUi();
+            UpdateCardsButton();
             CheckStarterOffer();
         }
     }

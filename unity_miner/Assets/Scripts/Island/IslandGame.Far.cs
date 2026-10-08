@@ -226,6 +226,12 @@ namespace Mineros.IslandView
         }
 
         /// <summary>Escala de dibujo de una veta (gigante, legendaria o roca de la isla lejana).</summary>
-        public static float OreScale(Ore o) { return o.Far ? 2.3f : o.Giant ? (o.Legendary ? 3.5f : 2.8f) : 1f; }
+        public static float OreScale(Ore o)
+        {
+            if (o.Far) return 2.3f;
+            if (o.Giant) return o.Legendary ? 3.5f : 2.8f;
+            if (o.Fancy >= 0) return Island.FxCatalog[o.Fancy].Effect == (int)Island.FxKind.MiniGiant ? 1.8f : 1.25f;   // roca de carta
+            return 1f;
+        }
     }
 }

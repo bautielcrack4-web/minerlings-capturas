@@ -214,8 +214,39 @@ namespace Mineros.IslandView
                 front.name = "Frente";
                 front.anchorMin = front.anchorMax = new Vector2(0.5f, 0.5f);
                 front.anchoredPosition = new Vector2(0f, 12f);
-                var pickBtn = Kit.Button(card, Loc.T("Elegir"), Kit.Green, 26, 170, 58);
-                Kit.Place((RectTransform)pickBtn.transform, 0.5f, 1f, -85f, -6f, 170, 58);
+                bool locked = i < Isl.RecruitLocked.Count && Isl.RecruitLocked[i];
+                int rid = i < Isl.RecruitIds.Count ? Isl.RecruitIds[i] : -1;
+                if (locked)
+                {
+                    // vista previa: el proximo especialista, oscuro, con candado y la habitacion del Cuartel que hace falta
+                    var shade = Kit.RoundImg(front, 18, new Color(0.08f, 0.06f, 0.1f, 0.62f), "Bloqueada");
+                    Kit.Stretch(shade.rectTransform);
+                    var lk = Kit.Icon(shade.transform, "lock", 72);
+                    Kit.Place((RectTransform)lk.transform, 0.5f, 0.5f, -36f, -70f, 72, 72);
+                    var bi = Kit.Img(shade.transform, IslandStage.I.BuildingIcon(BKind.Barracks, 1), Color.white, "Cuartel");
+                    bi.preserveAspect = true;
+                    Kit.Place(bi.rectTransform, 0.5f, 0.5f, -64f, 20f, 76, 76);
+                    Kit.LabelAt(shade.transform, Loc.T("Nv ") + c.RoomLevel, 30, Kit.Yellow, 5, true, 112, 168, 90, 44, TextAnchor.MiddleLeft);
+                }
+                else if (rid >= 0)
+                {
+                    // cada candidato es una persona: su cara y su nombre sobre la carta
+                    var ring = Kit.RoundImg(front, 34, rc, "MarcoCara");
+                    Kit.PlaceTL(ring.rectTransform, 6, 6, 68, 68);
+                    var msk = Kit.RoundImg(ring.transform, 30, Color.white, "Mascara");
+                    Kit.Stretch(msk.rectTransform, 4, 4, 4, 4);
+                    msk.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+                    var ph = Kit.Img(msk.transform, FaceSpriteId(rid, rc), Color.white, "Cara");
+                    Kit.Stretch(ph.rectTransform);
+                    var nb = Kit.RoundImg(front, 12, new Color(0.1f, 0.08f, 0.12f, 0.78f), "Nombre");
+                    Kit.PlaceTL(nb.rectTransform, 78, 26, 118, 32);
+                    var nl = Kit.Label(nb.transform, Island.FirstNameId(rid), 21, Color.white, 0, true, TextAnchor.MiddleCenter);
+                    Kit.Stretch(nl.rectTransform, 4, 0, 4, 0);
+                }
+                var pickBtn = Kit.Button(card, "", Kit.Green, 26, 120, 58);
+                Kit.Place((RectTransform)pickBtn.transform, 0.5f, 1f, -60f, -6f, 120, 58);
+                var pkI = Kit.Icon(pickBtn.Content, "check", 42);   // elegir = tilde
+                Kit.Place((RectTransform)pkI.transform, 0.5f, 0.5f, -21f, -24f, 42, 42);
                 pickBtn.gameObject.SetActive(false);
                 front.gameObject.SetActive(false);
                 var showPick = pickBtn.gameObject;
@@ -262,7 +293,7 @@ namespace Mineros.IslandView
                     Tw.After(card, "voltea", wait, () => Flip(card, back, front, () =>
                     {
                         flipped++;
-                        showPick.SetActive(true);
+                        showPick.SetActive(!locked);
                         Tw.Pop((RectTransform)showPick.transform, 1.15f);
                         if (cv != null) cv.Flash = 1f;
                         if (golden) GoldenReveal(card, c.Name, fr);

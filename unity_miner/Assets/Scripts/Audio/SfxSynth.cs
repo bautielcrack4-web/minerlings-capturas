@@ -73,6 +73,54 @@ namespace Mineros.Audio
             return clip;
         }
 
+        // ---------------------------------------------------------------- melodia propia de cada carta de efecto
+        static readonly float[] Penta = { 523.25f, 587.33f, 659.25f, 783.99f, 880f, 1046.5f, 1174.7f, 1318.5f, 1568f, 1760f };
+
+        /// <summary>
+        /// Jingle unico de la carta `id` (240 cartas = 240 melodias): 3 a 5 notas de una pentatonica (siempre suena bien),
+        /// ritmo y timbre segun el efecto (campana, pluck, chip o cuerno) y un brillo final mas largo en las raras.
+        /// </summary>
+        static AudioClip CardJingle(string name, int id)
+        {
+            var r = new System.Random(id * 7919 + 13);
+            int effect = id / 20, variant = id % 20;
+            int rarity = variant >= 16 ? 3 : variant >= 12 ? 2 : variant >= 6 ? 1 : 0;
+            int notes = 3 + Math.Min(2, rarity);
+            float step = 0.075f + (effect % 3) * 0.02f;
+            int timbre = effect % 4;
+            var f = new float[notes]; var t0 = new float[notes];
+            int idx = r.Next(0, 5);
+            for (int i = 0; i < notes; i++)
+            {
+                idx = Mathf.Clamp(idx + r.Next(-2, 4), 0, Penta.Length - 1);
+                if (i == notes - 1) idx = Mathf.Max(idx, 5);   // termina arriba: suena a premio
+                f[i] = Penta[idx] * (effect >= 6 ? 0.5f : 1f);
+                t0[i] = i * step * (r.NextDouble() < 0.25 ? 0.5f : 1f) + (i > 0 ? 0f : 0f);
+            }
+            float dur = t0[notes - 1] + 0.45f + rarity * 0.12f;
+            return Synth(name, dur, t =>
+            {
+                float v = 0f;
+                for (int i = 0; i < notes; i++)
+                {
+                    float u = t - t0[i];
+                    if (u < 0f) continue;
+                    bool last = i == notes - 1;
+                    float dec = last ? 6f - rarity : 14f;
+                    switch (timbre)
+                    {
+                        case 0: v += Bell(t, t0[i], f[i], 0.32f, dec); break;
+                        case 1: v += Sin(Tau * f[i] * u) * Exp(-u * dec * 1.4f) * 0.4f * Mathf.Min(1f, u * 600f); break;   // pluck
+                        case 2: v += Sq(f[i], u) * Exp(-u * dec * 1.2f) * 0.12f; break;                                        // chip
+                        default: v += Horn(t, t0[i], last ? 0.35f : step * 0.9f, f[i] * 0.5f, 0.42f); break;
+                    }
+                }
+                // destello final de las raras
+                if (rarity >= 2) v += Sin(Tau * 2637f * t) * Exp(-Mathf.Abs(t - t0[notes - 1] - 0.05f) * 30f) * 0.08f;
+                return v;
+            });
+        }
+
         static readonly float[] UpgradeNotes = { 523f, 659f, 784f, 1046f };
         static readonly float[] ClearNotes = { 523f, 659f, 784f, 1046f, 1046f, 1318f };
         static readonly float[] MilestoneNotes = { 523.25f, 659.25f, 783.99f, 1046.5f };
@@ -83,6 +131,7 @@ namespace Mineros.Audio
         /// <summary>Crea el efecto por nombre; devuelve null si el nombre no existe.</summary>
         public static AudioClip MakeSfx(string name)
         {
+            if (name.StartsWith("cj_")) { int id; if (int.TryParse(name.Substring(3), out id)) return CardJingle(name, id); }
             switch (name)
             {
                 case "pick":

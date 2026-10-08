@@ -160,7 +160,38 @@ namespace Mineros.IslandView
             goalFill.rectTransform.offsetMax = Vector2.zero;
             goalWide.gameObject.SetActive(false);
             goalBox.GetComponent<Image>().raycastTarget = true;
-            goalBox.gameObject.AddComponent<Btn>().Clicked += () => { if (goalOpen) goalOpenUntil = 0f; else OpenGoal(5f); };
+            // tocar la meta la abre; tocarla abierta te lleva a hacerla (edificio, catalogo o la veta mas cercana)
+            goalBox.gameObject.AddComponent<Btn>().Clicked += () => { if (goalOpen) { goalOpenUntil = 0f; GoalGo(); } else OpenGoal(5f); };
+            goalGo = (RectTransform)Kit.Icon(goalWide, "arrow", 30, "Ir").transform;
+            goalGo.localRotation = Quaternion.Euler(0, 0, -90f);
+        }
+
+        RectTransform goalGo;
+
+        /// <summary>"Llevame": lo que pide la meta, sin buscarlo (pedido del dueño: intuitivo y progresivo).</summary>
+        void GoalGo()
+        {
+            var g = Isl.CurrentGoal();
+            BKind k = BKind.Depot; bool building = false;
+            if (g.Stat == "th" || g.Stat == "lv_depot") { k = BKind.Depot; building = true; }
+            else if (g.Stat == "lv_house") { k = BKind.House; building = true; }
+            else if (g.Stat.StartsWith("b:")) building = System.Enum.TryParse(g.Stat.Substring(2), out k);
+            else if (g.Stat.StartsWith("b_")) building = System.Enum.TryParse(g.Stat.Substring(2), true, out k);
+            if (building)
+            {
+                var p = Isl.Find(k);
+                if (p != null) { game.Reveal(game.PlotWorld(p)); OpenPlot(p); return; }
+                if (buildBtn != null && buildBtn.gameObject.activeSelf) buildBtn.Click();   // todavia no esta: el catalogo
+                return;
+            }
+            // picar / vetas gigantes: la camara muestra la veta (la gigante si hay)
+            Ore best = Isl.Giant; float bd = float.MaxValue;
+            if (best == null)
+            {
+                Vector3 look = game.ScreenToGround(new Vector2(game.Cam.pixelWidth * 0.5f, game.Cam.pixelHeight * 0.5f));
+                foreach (var o in Isl.OreList) { if (o.Dead || o.Far) continue; float d = (new Vector3(o.X, 0, o.Z) - look).sqrMagnitude; if (d < bd) { bd = d; best = o; } }
+            }
+            if (best != null) game.Reveal(new Vector3(best.X, 0f, best.Z));
         }
 
         /// <summary>La tarjeta se abre sola un rato cuando hay una meta nueva o se completa; tocandola se abre o cierra.</summary>
@@ -205,8 +236,9 @@ namespace Mineros.IslandView
                 Text il;
                 if (info == null) { il = Kit.Label(goalWide, "", 18, Kit.Yellow, 0, true, TextAnchor.MiddleRight, "Info"); info = il.rectTransform; }
                 else il = info.GetComponent<Text>();
-                Kit.Place(info, 1f, 0f, -146f, 40f, 136, 30);
+                Kit.Place(info, 1f, 0f, -176f, 40f, 136, 30);
                 if (il.text != tail) il.text = tail;
+                Kit.Place(goalGo, 1f, 0f, -38f, 20f, 30, 30);
             }
         }
 
@@ -229,6 +261,13 @@ namespace Mineros.IslandView
                 }, () => Destroy(star.gameObject));
             }
             Tw.Pop(goalBox, 1.2f);
+            // sello de hecho que cae sobre la meta y se va
+            var stamp = (RectTransform)Kit.Icon(flyLayer, "stamp", 76, "Sello").transform;
+            stamp.anchoredPosition = c + new Vector2(70f, 0f);
+            stamp.localRotation = Quaternion.Euler(0, 0, -14f);
+            Tw.Scale(stamp, Vector3.one * 2.4f, Vector3.one, 0.22f, Ease.OutBack);
+            Mineros.Fx.Haptics.Heavy();
+            Tw.After(stamp, "sello", 1.1f, () => Tw.Scale(stamp, Vector3.one, Vector3.zero, 0.25f, Ease.InBack, 0f, () => Destroy(stamp.gameObject)));
             FlyCoins(LayerPos(goalBox, 60f), 6);   // la recompensa vuela desde el cartel (18)
             if (g.Gems > 0) FlyGems(LayerPos(goalBox), g.Gems);
         }
@@ -364,9 +403,33 @@ namespace Mineros.IslandView
         /// (por ejemplo "te faltan gemas"); lo que pasa solo en la isla ya no avisa con texto: se ve en el mundo.
         /// `force`: avisos que siguen a una accion del jugador aunque lleguen tarde (resultado de un anuncio).
         /// </summary>
+        /// <summary>
+        /// Avisos que se aprenden (pedido del dueño: "los gamers no quieren leer"): cada aviso sale completo las primeras
+        /// 2 veces; despues solo su icono y sus numeros ("+120", "x2", "3/5"); si no tiene ni icono ni numeros, ya no sale.
+        /// Los forzados (momentos unicos) siempre van completos.
+        /// </summary>
+        static readonly System.Text.RegularExpressions.Regex numRx = new System.Text.RegularExpressions.Regex(@"[+x]?\d[\d.,:/%]*[KMBT]?");
+
+        string Learned(string text, Sprite icon, bool force)
+        {
+            if (force || Isl == null || string.IsNullOrEmpty(text)) return text;
+            string key = "t:" + System.Text.RegularExpressions.Regex.Replace(text, @"\d", "");
+            if (key.Length > 40) key = key.Substring(0, 40);
+            long seen = Isl.Stat(key);
+            Isl.AddStat(key, 1);
+            if (seen < 2) return text;
+            var nums = new List<string>();
+            foreach (System.Text.RegularExpressions.Match mt in numRx.Matches(text)) nums.Add(mt.Value);
+            string compact = string.Join(" ", nums.ToArray());
+            if (compact == "" && icon == null) return null;
+            return compact;
+        }
+
         public void Toast(string text, Color col, Sprite icon = null, bool force = false)
         {
             if (!force && Time.unscaledTime - lastTouchT > 0.8f) return;
+            text = Learned(text, icon, force);
+            if (text == null) return;
             if (toasts.Count > 2) return;
             if (text == lastToast && Time.unscaledTime - lastToastT < 4f) return;   // el mismo aviso seguido no se repite
             lastToast = text; lastToastT = Time.unscaledTime;

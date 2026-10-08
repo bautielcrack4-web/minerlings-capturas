@@ -29,6 +29,9 @@ namespace Mineros.Core
         /// <summary>Playa de la isla lejana donde amarra la balsa.</summary>
         public static float FarBeachX { get { return FarX - FarDirX * (FarR - 0.6f); } }
         public static float FarBeachZ { get { return FarZ - FarDirZ * (FarR - 0.6f); } }
+        /// <summary>Donde amarra la balsa alla: en el agua frente a la playa (en la playa quedaba enterrada en la arena).</summary>
+        public static float FarDockX { get { return FarX - FarDirX * (FarR + 1.6f); } }
+        public static float FarDockZ { get { return FarZ - FarDirZ * (FarR + 1.6f); } }
 
         public bool FarFound;
         public int FarFocus = -1;   // id de la roca fijada por el jugador
@@ -207,7 +210,7 @@ namespace Mineros.Core
                     float hx, hz; RaftHome(out hx, out hz);
                     float u = RaftT * RaftT * (3f - 2f * RaftT);
                     bool going = Raft == RaftState.ToFar;
-                    float ax = going ? hx : FarBeachX, az = going ? hz : FarBeachZ, bx = going ? FarBeachX : hx, bz = going ? FarBeachZ : hz;
+                    float ax = going ? hx : FarDockX, az = going ? hz : FarDockZ, bx = going ? FarDockX : hx, bz = going ? FarDockZ : hz;
                     // arco suave (no una linea recta): se ve navegar
                     float px = -(bz - az), pz = bx - ax, pl = (float)Math.Sqrt(px * px + pz * pz);
                     float bow = (float)Math.Sin(u * Math.PI) * 3.5f / Math.Max(pl, 1e-3f);
@@ -233,7 +236,7 @@ namespace Mineros.Core
                     break;
                 }
                 case RaftState.AtFar:
-                    RaftX = FarBeachX; RaftZ = FarBeachZ;
+                    RaftX = FarDockX; RaftZ = FarDockZ;
                     if (hour >= 19f || hour < 6f || FarRockCount == 0)
                     {
                         SetRaft(RaftState.ToBeach);

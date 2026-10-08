@@ -547,6 +547,9 @@ namespace Mineros.Miners
 
             model = Node(transform, "Model", Vector3.zero);
             model.localScale = Vector3.one * ImportedScale;
+            // la persona de su foto (carnet): tono de piel y rasgos (barba, bigote, anteojos)
+            var look = Island.LookOfId(variant);
+            int face = Island.FaceOfId(variant);
             var nodes = new Dictionary<string, Transform>();
             var pending = new List<ImportedMiner.Group>(d.groups);
             while (pending.Count > 0)
@@ -573,7 +576,7 @@ namespace Mineros.Miners
                 }
                 var go = new GameObject("Mesh");
                 go.transform.SetParent(t, false);
-                go.AddComponent<MeshFilter>().sharedMesh = ImportedMiner.MeshOf(g);
+                go.AddComponent<MeshFilter>().sharedMesh = ImportedMiner.MeshOf(g, look.Skin);
                 var mr = go.AddComponent<MeshRenderer>();
                 mr.sharedMaterials = mats;
                 mr.shadowCastingMode = ShadowCastingMode.On;
@@ -582,6 +585,18 @@ namespace Mineros.Miners
                 mr.reflectionProbeUsage = ReflectionProbeUsage.Off;
             }
             hips = nodes["hips"]; torso = nodes["torso"]; head = nodes["head"];
+            var faceMesh = MinerFace.MeshFor(look, face);
+            if (faceMesh != null)
+            {
+                var fgo = new GameObject("Cara");
+                fgo.transform.SetParent(head, false);
+                fgo.AddComponent<MeshFilter>().sharedMesh = faceMesh;
+                var fmr = fgo.AddComponent<MeshRenderer>();
+                fmr.sharedMaterial = vcM;
+                fmr.shadowCastingMode = ShadowCastingMode.Off;
+                fmr.lightProbeUsage = LightProbeUsage.Off;
+                fmr.reflectionProbeUsage = ReflectionProbeUsage.Off;
+            }
             armL = nodes["armL"]; armR = nodes["armR"]; legL = nodes["legL"]; legR = nodes["legR"];
             hipBase = hips.localPosition.y;
             bobScale = 1f / 1.85f;
@@ -753,7 +768,7 @@ namespace Mineros.Miners
             for (int i = 0; i < verts.Count; i++)
             {
                 var bt = bones[weights[i].boneIndex0];
-                if (head == null || (bt != head && bt.parent != head)) continue;
+                if (head == null || (bt != head && bt.parent != head) || bt.name == "Cara") continue;   // la barba rubia no es casco
                 float hh, ss, vv;
                 Color.RGBToHSV(cols[i], out hh, out ss, out vv);
                 bool ginger = Mathf.Abs(cols[i].r - 0.79f) < 0.06f && Mathf.Abs(cols[i].g - 0.51f) < 0.06f && Mathf.Abs(cols[i].b - 0.23f) < 0.06f;   // pelo colorado

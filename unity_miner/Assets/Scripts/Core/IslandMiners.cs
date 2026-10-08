@@ -81,6 +81,9 @@ namespace Mineros.Core
         /// <summary>Candidatos que trajo el barco (indice del personaje y si es dorado). Vacio = no hay eleccion pendiente.</summary>
         public readonly List<int> Recruits = new List<int>();
         public readonly List<bool> RecruitGolden = new List<bool>();
+        /// <summary>Cada candidato es una persona (su id define cara y nombre) y algunos vienen bloqueados (vista previa).</summary>
+        public readonly List<int> RecruitIds = new List<int>();
+        public readonly List<bool> RecruitLocked = new List<bool>();
         /// <summary>Album: personajes descubiertos (y su version dorada).</summary>
         public readonly bool[] Found = new bool[Roster.Length], FoundGolden = new bool[Roster.Length];
         readonly Dictionary<long, float> pairTime = new Dictionary<long, float>();
@@ -114,15 +117,30 @@ namespace Mineros.Core
 
         void OfferRecruits()
         {
-            Recruits.Clear(); RecruitGolden.Clear();
-            for (int i = 0; i < 3; i++)
+            Recruits.Clear(); RecruitGolden.Clear(); RecruitIds.Clear(); RecruitLocked.Clear();
+            // antes: con solo el de Piedra habilitado salian 3 cartas identicas. Ahora cada candidato es una persona
+            // distinta (cara y nombre propios) y, si todavia hay una sola clase, la tercera carta muestra BLOQUEADO al
+            // proximo especialista con la habitacion que hace falta: se entiende que construir para conseguirlo.
+            int unlocked = 0;
+            for (int i = 0; i < Roster.Length; i++) if (!Roster[i].Secret && SpecUnlocked(i)) unlocked++;
+            int preview = -1;
+            if (unlocked < 2)
+            {
+                int best = int.MaxValue;
+                for (int i = 0; i < Roster.Length; i++)
+                    if (!Roster[i].Secret && !SpecUnlocked(i) && Roster[i].RoomLevel < best) { best = Roster[i].RoomLevel; preview = i; }
+            }
+            int n = preview >= 0 ? 2 : 3;
+            for (int i = 0; i < n; i++)
             {
                 bool g;
                 int c = RollChar(out g);
                 int tries = 0;
                 while (Recruits.Contains(c) && tries++ < 10) c = RollChar(out g);
-                Recruits.Add(c); RecruitGolden.Add(g);
+                Recruits.Add(c); RecruitGolden.Add(g); RecruitLocked.Add(false);
+                RecruitIds.Add(nextMiner + i);
             }
+            if (preview >= 0) { Recruits.Add(preview); RecruitGolden.Add(false); RecruitLocked.Add(true); RecruitIds.Add(nextMiner + n); }
             RecruitsArrived?.Invoke();
         }
 
@@ -130,20 +148,24 @@ namespace Mineros.Core
         public Miner ChooseRecruit(int i)
         {
             if (i < 0 || i >= Recruits.Count || Miners.Count >= MinerCap()) return null;
+            if (i < RecruitLocked.Count && RecruitLocked[i]) return null;   // vista previa: no se puede elegir
             int c = Recruits[i]; bool g = RecruitGolden[i];
-            Recruits.Clear(); RecruitGolden.Clear();
-            var m = AddMiner(c, g, false);
+            int id = i < RecruitIds.Count ? RecruitIds[i] : -1;
+            Recruits.Clear(); RecruitGolden.Clear(); RecruitIds.Clear(); RecruitLocked.Clear();
+            var m = AddMiner(c, g, false, id);
             if (Miners.Count < MinerCap()) OfferRecruits();
             return m;
         }
 
-        Miner AddMiner(int charId, bool golden, bool initial)
+        Miner AddMiner(int charId, bool golden, bool initial, int id = -1)
         {
+            if (id < nextMiner) id = nextMiner;   // (ids reservados para los candidatos; nunca uno ya usado)
+            nextMiner = id + 1;
             Plot home = null; int seen = 0;
             foreach (var p in Plots)
                 if (p.Building == (int)BKind.House) { seen += p.Level; if (seen > Miners.Count) { home = p; break; } }
             if (home == null) home = Find(BKind.House) ?? Plots[0];
-            var m = new Miner { Id = nextMiner++, Home = home.Id, X = home.X, Z = home.Z - 1.4f, Face = 0f, Char = charId, Golden = golden, Level = 1 };
+            var m = new Miner { Id = id, Home = home.Id, X = home.X, Z = home.Z - 1.4f, Face = 0f, Char = charId, Golden = golden, Level = 1 };
             m.State = initial ? MState.Idle : MState.Spawning;
             Miners.Add(m);
             Found[charId] = true;

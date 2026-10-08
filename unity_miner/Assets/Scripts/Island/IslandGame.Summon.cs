@@ -115,10 +115,9 @@ namespace Mineros.IslandView
             Vector3 at = info.At;
             Material artMat, frameMat;
             var card = MakeWorldCard(info, out artMat, out frameMat);
-            // la camara se acerca un poco a donde cae: el nacimiento se lee (y despues vuelve)
+            // la camara es del jugador: ya no se acerca sola (pedido del dueño); la carta cae donde el la solto, que ya se ve
             float prevZoom = zoomTarget;
             FocusOn(at);
-            zoomTarget = Mathf.Min(zoomTarget, 9f);
             float yaw = Cam.transform.eulerAngles.y;   // de frente a la camara: se lee el dibujo
             // 1) cae desde la mano y se clava en el suelo, inclinada hacia la camara (se lee el dibujo)
             const float Lean = -50f;

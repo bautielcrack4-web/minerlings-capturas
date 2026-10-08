@@ -77,6 +77,8 @@ namespace Mineros.Core
                 if (pc > 0 && Plans < MaxPlans && rng.NextDouble() < pc) { l.Plans = 1; AddPlans(1); }
                 if (t >= 1 && rng.NextDouble() < 0.25) { l.Portable = (int)PortableKinds[rng.Next(PortableKinds.Length)]; AddPortable((ModKind)l.Portable); }
             }
+            // a veces una carta de efecto (mas seguido en los cofres buenos)
+            if (rng.NextDouble() < 0.25 + 0.2 * t) { l.FxCard = RollFxCard(Math.Min(2, t)); GiveFxCard(l.FxCard); }
             return l;
         }
 

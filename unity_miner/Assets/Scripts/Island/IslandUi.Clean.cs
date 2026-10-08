@@ -201,8 +201,13 @@ namespace Mineros.IslandView
             close.Clicked += () => { if (!sheetLocked) CloseSheet(); };
             var rows = new List<MenuRow>();
             foreach (var r in menuRows) if (r.Open()) rows.Add(r);
-            const float rowH = 74f, w = 330f;
-            float h = rows.Count * rowH + 30f;
+            // grilla de iconos grandes (pedido del dueño: "los gamers no quieren leer"): 3 columnas, etiqueta chica,
+            // punto rojo en lo nuevo y el dato (contadores) como globito
+            const int cols = 3;
+            const float tile = 104f, gap = 10f;
+            float w = cols * tile + (cols + 1) * gap;
+            int nRows = (rows.Count + cols - 1) / cols;
+            float h = nRows * (tile + gap) + gap;
             var panel = Kit.Img(sheet, ButtonArt.Box(Kit.Cream, 26f, 6f, 0.3f), Color.white, "Marco");
             panel.type = Image.Type.Sliced;
             var pr = panel.rectTransform;
@@ -214,27 +219,34 @@ namespace Mineros.IslandView
             for (int i = 0; i < rows.Count; i++)
             {
                 var r = rows[i];
-                // cada fila es un boton con profundidad (cara clara, labio, se hunde al tocar)
-                var hit = Kit.Button(pr, "", new Color(1f, 0.985f, 0.95f), 20, w - 28f, rowH - 6f, r.Key);
-                Kit.PlaceTL((RectTransform)hit.transform, 14, 14 + i * rowH, w - 28f, rowH - 6f);
+                var hit = Kit.Button(pr, "", new Color(1f, 0.985f, 0.95f), 20, tile, tile, r.Key);
+                Kit.PlaceTL((RectTransform)hit.transform, gap + (i % cols) * (tile + gap), gap + (i / cols) * (tile + gap), tile, tile);
                 var cont = hit.Content;
                 var ic = Kit.Img(cont, r.Icon(), Color.white, "Icono");
                 ic.preserveAspect = true;
-                Kit.Place(ic.rectTransform, 0f, 0.5f, 6f, -22f, 44, 44);
+                Kit.Place(ic.rectTransform, 0.5f, 0f, -29f, 10f, 58, 58);
                 if (r.Key == "ajustes") ic.color = Kit.Brown;
-                var nl = Kit.Label(cont, r.Name, 25, Kit.Brown, 0, true, TextAnchor.MiddleLeft, "Nombre");
-                Kit.Stretch(nl.rectTransform, 60, 0, 90, 0);
+                var nl = Kit.Label(cont, r.Name, 16, Kit.Brown, 0, true, TextAnchor.MiddleCenter, "Nombre");
+                Kit.Place(nl.rectTransform, 0.5f, 0f, -tile * 0.5f + 4f, 70f, tile - 8f, 24f);
+                nl.resizeTextForBestFit = true; nl.resizeTextMinSize = 11; nl.resizeTextMaxSize = 16;
                 string right = r.Right != null ? r.Right() : "";
                 bool isNew = menuNew.Contains(r.Key);
-                if (isNew) right = Loc.T("Nuevo");
-                if (right != "")
+                if (isNew || r.Key == "diario" && right != "")
                 {
-                    bool hot = isNew || r.Key == "diario";
-                    var tag = Kit.Label(cont, right, 20, hot ? Kit.Red : new Color(0.55f, 0.47f, 0.4f), 0, true, TextAnchor.MiddleRight, "Dato");
-                    Kit.Stretch(tag.rectTransform, 150, 0, 10, 0);
-                    if (hot) Tw.Pop(tag.rectTransform, 1.3f);
+                    // punto rojo (lo nuevo / lo que hay para cobrar)
+                    var dot = Kit.RoundImg(cont, 11, Kit.Red, "Nuevo");
+                    Kit.Place(dot.rectTransform, 1f, 0f, -26f, 4f, 22, 22);
+                    Tw.Pop(dot.rectTransform, 1.4f);
                 }
-                // cascada: cada fila entra 30 ms despues de la anterior, con un gesto del icono
+                else if (right != "")
+                {
+                    var tag = Kit.RoundImg(cont, 11, new Color(0.45f, 0.36f, 0.28f, 0.9f), "Dato");
+                    Kit.Place(tag.rectTransform, 1f, 0f, -52f, 4f, 48, 24);
+                    var tl = Kit.Label(tag.transform, right, 15, Color.white, 0, true, TextAnchor.MiddleCenter);
+                    Kit.Stretch(tl.rectTransform, 2, 0, 2, 0);
+                    tl.resizeTextForBestFit = true; tl.resizeTextMinSize = 9; tl.resizeTextMaxSize = 15;
+                }
+                // cascada: cada icono entra 30 ms despues del anterior
                 var hrt = (RectTransform)hit.transform;
                 hrt.localScale = Vector3.zero;
                 Tw.Scale(hrt, Vector3.zero, Vector3.one, 0.24f, Ease.OutBack, 0.06f + Mineros.UI.Motion.Delay(i));

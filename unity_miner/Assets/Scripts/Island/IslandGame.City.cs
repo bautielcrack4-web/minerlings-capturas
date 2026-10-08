@@ -135,6 +135,7 @@ namespace Mineros.IslandView
             for (int i = 0; i < s.Stones.Count; i++)
             {
                 var st = s.Stones[i];
+                if (st == null) continue;   // la obra se rearmo mientras tanto (se termino o se movio)
                 st.gameObject.SetActive(true);
                 StartCoroutine(StoneHop(st));
                 Sfx.Play("pop", -14f, 0.9f + i * 0.04f);

@@ -39,6 +39,10 @@ namespace Mineros.IslandView
             holder.SetParent(v.Body, false);
             holder.position = v.Root.position;
             holder.rotation = Quaternion.Euler(0f, 35f, 0f);   // frente (-Z) hacia la camara
+            // mas grandes (en la tanda 17 se perdian de lejos), sin alejarlas del edificio
+            const float S = 1.45f;
+            holder.localScale = Vector3.one * S;
+            R /= S;
             var old = new MeshBuilder();
             for (int l = 2; l < lv; l++) DressPiece(old, l, R);
             if (old.TriCount > 0) IslandArt.Bake(old, holder, "Viejos", true);

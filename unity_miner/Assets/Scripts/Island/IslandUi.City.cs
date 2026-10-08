@@ -540,8 +540,12 @@ namespace Mineros.IslandView
             fill.rectTransform.anchorMin = new Vector2(0f, 0f); fill.rectTransform.anchorMax = new Vector2(0f, 1f);
             fill.rectTransform.pivot = new Vector2(0f, 0.5f);
             fill.rectTransform.offsetMin = new Vector2(3, 3); fill.rectTransform.offsetMax = new Vector2(3, -3);
-            var b = Kit.Button(box, "", Kit.Green, 26, 220, 76);
+            var b = Kit.Button(box, "", Kit.Green, 30, 220, 76);
             Kit.PlaceTL((RectTransform)b.transform, 390, 8, 220, 76);
+            var finI = Kit.Icon(b.Content, "speed", 44);
+            Kit.PlaceTL((RectTransform)finI.transform, 16, 12, 44, 44);
+            b.Label.alignment = TextAnchor.MiddleCenter;
+            Kit.Stretch(b.Label.rectTransform, 60, 0, 10, 4);
             b.Clicked += () =>
             {
                 if (Isl.SpeedUp(p))
@@ -561,8 +565,10 @@ namespace Mineros.IslandView
                 float f = p.WorkTotal > 0 ? Mathf.Clamp01(1f - (float)(p.Work / p.WorkTotal)) : 1f;
                 fill.rectTransform.sizeDelta = new Vector2(Mathf.Max(20f, 594f * f), fill.rectTransform.sizeDelta.y);
                 int g = Isl.SpeedUpGems(p);
-                string t = g == 0 ? Loc.T("¡Terminar gratis!") : Loc.T("Terminar: ") + g + Loc.T(" gemas");
+                // terminar ya: rayo + "GRATIS" o rayo + gema + numero
+                string t = g == 0 ? "FREE" : g.ToString();
                 if (b.Label.text != t) b.Label.text = t;
+                if (finI != null) finI.SetKind(g == 0 ? "speed" : "gem");
                 int isFree = g == 0 ? 1 : 0;
                 if (isFree != skinFree) { skinFree = isFree; b.SetSkin(Kit.Skin(g == 0 ? Kit.Green : Kit.Purple)); }
             });
@@ -657,15 +663,18 @@ namespace Mineros.IslandView
             AddShine(rb, () => p.Ready > 0);
             sheetRefresh.Add(() =>
             {
-                string t = p.Ready > 0 ? Loc.T("Cobrar ") + p.Ready : (p.Queue.Count > 0 ? Clock(Island.Recipes[p.Queue[0]].Time / Isl.ProdSpeed(p) * (1f - Isl.ProdProgress(p))) : Loc.T("Vacío"));
+                string t = p.Ready > 0 ? "+" + p.Ready : (p.Queue.Count > 0 ? Clock(Island.Recipes[p.Queue[0]].Time / Isl.ProdSpeed(p) * (1f - Isl.ProdProgress(p))) : "");
                 if (rb.Label.text != t) rb.Label.text = t;
                 rb.Interactable = p.Ready > 0;
             });
-            // recetas
+            // recetas: primero lo que hace falta para el proximo Ayuntamiento (con "!" y cuantas faltan)
+            rec = new List<int>(rec);
+            rec.Sort((a, c) => (Isl.NeedFor(Island.Recipes[c].Out) > 0 ? 1 : 0).CompareTo(Isl.NeedFor(Island.Recipes[a].Out) > 0 ? 1 : 0));
             foreach (int ri in rec)
             {
                 var rc = Island.Recipes[ri];
                 bool known = Island.RDef(rc.Out).Th <= Isl.Th;
+                int need = known ? Isl.NeedFor(rc.Out) : 0;
                 var s = Section(body, 128, "Receta");
                 var box = Kit.OutBox(s, 18, 4, 5, known ? Color.white : Icons.H("e2d8c4"), Kit.Out, "Caja");
                 Kit.Stretch(box, 4, 4, 4, 4);
@@ -673,6 +682,19 @@ namespace Mineros.IslandView
                 ic.preserveAspect = true;
                 Kit.PlaceTL(ic.rectTransform, 12, 14, 84, 84);
                 Kit.LabelAt(box, Island.RDef(rc.Out).Name, 26, Kit.Brown, 0, true, 104, 8, 300, 32);
+                if (need > 0)
+                {
+                    // hace falta: "!" rojo + el Ayuntamiento chiquito + cuantas faltan
+                    var nb = Kit.RoundImg(box, 16, Kit.Red, "HaceFalta");
+                    Kit.PlaceTL(nb.rectTransform, 2, 2, 34, 34);
+                    var nl = Kit.Label(nb.transform, "!", 24, Color.white, 4, true, TextAnchor.MiddleCenter);
+                    Kit.Stretch(nl.rectTransform);
+                    Tw.To(nb.rectTransform, "late", 999f, Ease.Linear, u => nb.rectTransform.localScale = Vector3.one * (1f + Mathf.Sin(Time.time * 5f) * 0.08f));
+                    var th = Kit.Img(box, IslandStage.I.BuildingIcon(BKind.Depot, Island.Tier(Mathf.Max(1, Isl.Th))), Color.white, "Ayuntamiento");
+                    th.preserveAspect = true;
+                    Kit.PlaceTL(th.rectTransform, 330, 2, 40, 40);
+                    Kit.LabelAt(box, "x" + need, 22, Kit.Red, 0, true, 372, 6, 60, 34);
+                }
                 var mats = new List<KeyValuePair<Res, int>>();
                 for (int i = 0; i < rc.In.Length; i++) mats.Add(new KeyValuePair<Res, int>(rc.In[i], rc.InN[i]));
                 MatsRow(box, 104, 44, mats, 36f);
@@ -682,8 +704,11 @@ namespace Mineros.IslandView
                     Kit.LabelAt(box, Loc.T("Ayuntamiento ") + Island.RDef(rc.Out).Th, 22, Kit.OrangeD, 0, true, 420, 40, 190, 40, TextAnchor.MiddleCenter);
                     continue;
                 }
-                var b = Kit.Button(box, Loc.T("Hacer"), Kit.Green, 28, 170, 80);
-                Kit.PlaceTL((RectTransform)b.transform, 440, 20, 170, 80);
+                // fabricar: icono de "play" (sin palabra)
+                var b = Kit.Button(box, "", Kit.Green, 28, 130, 80);
+                Kit.PlaceTL((RectTransform)b.transform, 480, 20, 130, 80);
+                var pi = Kit.Icon(b.Content, "play", 46);
+                Kit.Place((RectTransform)pi.transform, 0.5f, 0.5f, -23f, -27f, 46, 46);
                 int rid = ri;
                 b.Clicked += () =>
                 {

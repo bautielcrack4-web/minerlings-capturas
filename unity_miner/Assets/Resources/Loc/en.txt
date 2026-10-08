@@ -786,3 +786,39 @@ Premio mayor seguro en 	Jackpot in
 ¡La balsa zarpa a las 6:00!	The raft sets sail at 6 AM!
 Necesitás un Muelle para llegar	You need a Dock to get there
 Su balsa lleva mineros a la isla lejana (1 asiento por nivel). Y llegan barcos que pagan el triple.	Its raft takes miners to the far island (1 seat per level). Ships also pay 3x.
+Roca de Oro	Gold Rock
+Roca de Gema	Gem Rock
+Piñata	Piñata
+Meteoritos	Meteors
+Fuente de Monedas	Coin Fountain
+Fuegos Artificiales	Fireworks
+Anillo de Flores	Flower Ring
+Roca Arcoíris	Rainbow Rock
+Frenesí	Frenzy
+Trébol	Clover
+Mini Veta	Mini Vein
+Roca Misteriosa	Mystery Rock
+de Piedra	Stone
+Musgosa	Mossy
+de Arena	Sand
+de Coral	Coral
+de Menta	Mint
+de Caramelo	Candy
+de Rubí	Ruby
+de Esmeralda	Emerald
+de Zafiro	Sapphire
+de Amatista	Amethyst
+de Escarcha	Frost
+de Lava	Lava
+Neón	Neon
+del Atardecer	Sunset
+del Océano	Ocean
+de Obsidiana	Obsidian
+Estelar	Starlight
+Real	Royal
+Fantasma	Ghost
+Dorada	Golden
+Rara	Rare
+Épica	Epic
+Legendaria	Legendary
+Sobres de cartas	Card packs

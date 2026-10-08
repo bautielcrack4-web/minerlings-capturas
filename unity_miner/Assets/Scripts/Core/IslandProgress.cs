@@ -297,7 +297,7 @@ namespace Mineros.Core
             AddStat("islands", 1);
             AddXp(200);
             Coins = 0; TotalEarned = 0; Expand = 0; WonderPhase = 0; GoalIdx = 0; TurboT = 0; FrenzyT = 0;
-            CurShip = null; CurBottle = null; CurCritter = null; Recruits.Clear(); RecruitGolden.Clear();
+            CurShip = null; CurBottle = null; CurCritter = null; Recruits.Clear(); RecruitGolden.Clear(); RecruitIds.Clear(); RecruitLocked.Clear();
             Decor.Clear(); Orders.Clear(); OreList.Clear(); ResetComplex();
             Raft = RaftState.Docked; Crew.Clear(); FarFocus = -1;   // la isla lejana queda descubierta; sus rocas vuelven a salir
             for (int i = 0; i < Plots.Count; i++)

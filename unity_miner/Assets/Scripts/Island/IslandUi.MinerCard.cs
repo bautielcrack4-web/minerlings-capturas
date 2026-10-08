@@ -24,13 +24,15 @@ namespace Mineros.IslandView
         static readonly Dictionary<int, Sprite> faceCache = new Dictionary<int, Sprite>();
 
         /// <summary>Foto del minero (Resources/Faces/fNN), o el busto dibujado si falta.</summary>
-        public static Sprite FaceSprite(Miner m)
+        public static Sprite FaceSprite(Miner m) { return FaceSpriteId(m.Id, IslandGame.HelmetOf(m)); }
+
+        public static Sprite FaceSpriteId(int minerId, Color helmet)
         {
-            int i = Island.FaceOf(m);
+            int i = Island.FaceOfId(minerId);
             Sprite s;
             if (faceCache.TryGetValue(i, out s) && s != null) return s;
             var tex = Resources.Load<Texture2D>("Faces/f" + i.ToString("00"));
-            s = tex != null ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f) : Icons.MinerBust(IslandGame.HelmetOf(m));
+            s = tex != null ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f) : Icons.MinerBust(helmet);
             faceCache[i] = s;
             return s;
         }

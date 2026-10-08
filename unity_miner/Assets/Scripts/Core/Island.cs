@@ -97,6 +97,8 @@ namespace Mineros.Core
         public int BossPhase;
         public bool NightCrystal;   // cristal nocturno: solo de noche, lo toca el jugador (los mineros no), se apaga al amanecer
         public bool Far;            // roca exclusiva de la isla lejana (barra de vida, cientos de toques)
+        public int Fancy = -1;      // roca que salio de una carta de efecto (su numero): color y melodia propios
+        public double FancyPay; public int FancyGems; public bool FancyPaid;
     }
 
     public sealed class Miner
@@ -124,7 +126,7 @@ namespace Mineros.Core
         public float Y;
         public bool InComplex;
         public float QueueT;        // tiempo en la cola de una habitacion (orden de llegada)
-        public float StuckT, StuckBest = 1e9f, GhostT;   // anti-atasco al caminar (no se guarda)
+        public float StuckT, StuckBest = 1e9f, GhostT, StuckX = 1e9f, StuckZ;   // anti-atasco al caminar (no se guarda)
     }
 
     /// <summary>
@@ -222,6 +224,7 @@ namespace Mineros.Core
         public readonly List<Ore> OreList = new List<Ore>();
         public readonly List<Miner> Miners = new List<Miner>();
         int nextOre = 1, nextMiner = 1;
+        float tickDt = 0.016f;
         float spawnT;
         readonly Random rng;
 
@@ -322,7 +325,9 @@ namespace Mineros.Core
         /// <summary>Se puede mejorar sin mirar monedas ni materiales: no esta en obra, hay constructor y tope.</summary>
         public bool UpgradeAllowed(Plot p)
         {
-            return p.Building >= 0 && p.Level >= 1 && p.Work <= 0 && p.Level < LevelCap((BKind)p.Building) && FreeBuilders() > 0;
+            // el Ayuntamiento no espera constructor libre (simulacion: con los 3 ocupados en mejoras largas quedaba
+            // trabado 27 minutos teniendo todo lo demas; es lo que abre el resto del juego)
+            return p.Building >= 0 && p.Level >= 1 && p.Work <= 0 && p.Level < LevelCap((BKind)p.Building) && (FreeBuilders() > 0 || p.Building == (int)BKind.Depot);
         }
 
         public bool CanUpgrade(Plot p)
@@ -414,6 +419,7 @@ namespace Mineros.Core
         {
             if (dt <= 0f) return;
             dt = Math.Min(dt, 0.1f);
+            tickDt = dt;
             foreach (var p in Plots) if (p.BuildT >= 0f) { p.BuildT -= dt; if (p.BuildT < 0f) p.BuildT = -1f; }
             foreach (var o in OreList) o.Age += dt;
             OreList.RemoveAll(o => o.Dead);
@@ -560,7 +566,7 @@ namespace Mineros.Core
             if (Giant != null || TotalEarned < 120) return;
             giantT -= dt;
             if (giantT > 0f) return;
-            giantT = (float)(140 + rng.NextDouble() * 100) / (float)(1.0 + 0.15 * Level(BKind.Lighthouse)) * (Weekend ? 0.75f : 1f);
+            giantT = (float)(210 + rng.NextDouble() * 120) / (float)(1.0 + 0.15 * Level(BKind.Lighthouse)) * (Weekend ? 0.75f : 1f);   // evento, no rutina (era 140-240)
             SpawnGiant(false, false, TotalEarned > 5000 && rng.NextDouble() < LegendaryChance * (1.0 + 0.1 * Level(BKind.Lighthouse)) * (Weekend ? 3.0 : 1.0));
         }
 
@@ -601,13 +607,13 @@ namespace Mineros.Core
             m.Energy = Math.Max(0f, m.Energy - 0.4f);
             // era 0.25: con 12 mineros son cientos de golpes y la veta gigante daba el 54 % de todas las monedas
             // (auditoria final, simulacion del Core); el toque del jugador sigue pagando 0.1 (premia al que juega)
-            double v = GiantValue() * 0.06;
+            double v = GiantValue() * 0.03;   // (0.06: la veta gigante era el 40 % de todas las monedas en la simulacion)
             Earn(v);
             GiantPaid?.Invoke(o, v);
             if (o.Hp > 0) return;
             o.Dead = true;
             AddStat("giants", 1);
-            double bonus = GiantValue() * (o.Legendary ? 125 : 25);
+            double bonus = GiantValue() * (o.Legendary ? 60 : 16);
             Earn(bonus);
             Gems += o.Legendary ? 10 : 2;
             GiveChest(o.Legendary ? 2 : 1);
@@ -727,7 +733,7 @@ namespace Mineros.Core
             double pinch = (combo >= CoinCombo || FrenzyT > 0f) ? Math.Max(1, Math.Round(Ores[o.Kind].Value * PriceMult() * 0.25)) : 0;
             if (o.Giant)
             {
-                double v = GiantValue() * (o.Legendary ? 0.2 : 0.1) * (LastCrit ? 3 : 1);
+                double v = GiantValue() * (o.Legendary ? 0.15 : 0.07) * (LastCrit ? 3 : 1);
                 Earn(v);
                 GiantPaid?.Invoke(o, v);
                 if (o.Boss) BossHit(o);
@@ -737,6 +743,7 @@ namespace Mineros.Core
             if (o.Hp > 0) { if (pinch > 0) Earn(pinch); return pinch; }
             o.Dead = true;
             LastBroke = true;
+            FancyBroke(o);
             AddStat("tap_breaks", 1);
             AddRes(OreRes[o.Kind], Ores[o.Kind].Units);   // lo que rompe el jugador tambien suma al galpon
             Mined[o.Kind]++;
@@ -947,6 +954,7 @@ namespace Mineros.Core
                             m.CarryKind = o.Kind;
                             m.CarryUnits = Ores[o.Kind].Units * CarryCap();
                             m.Target = -1;
+                            FancyBroke(o);
                             MinerBroke(m, o);
                             if (o.Kind >= 1) RollPiece(PieceChance);
                             OreBroken?.Invoke(o, m);
@@ -1092,12 +1100,19 @@ namespace Mineros.Core
                 // nada libre para picar: pasea tranquilo por SU zona (antes: alrededor de la casa, todos juntos)
                 if (m.T > 2.5f)
                 {
-                    double a = rng.NextDouble() * Math.PI * 2;
-                    m.TX = zx + (float)Math.Cos(a) * 1.6f; m.TZ = zz + (float)Math.Sin(a) * 1.6f;
-                    if (!FreeSpot(m.TX, m.TZ, 0.6f)) { m.TX = m.X; m.TZ = m.Z; }
+                    // punto de paseo con margen de sobra: el desvio de los edificios empieza a 1.55 m de su borde, y un
+                    // punto mas cerca los dejaba "caminando en el lugar" (la causa de 121 de 125 atascos en la simulacion)
+                    m.TX = m.X; m.TZ = m.Z;
+                    for (int tries = 0; tries < 8; tries++)
+                    {
+                        double a = rng.NextDouble() * Math.PI * 2;
+                        float cx = tries < 5 ? zx : m.X, cz = tries < 5 ? zz : m.Z;
+                        float tx = cx + (float)Math.Cos(a) * 1.6f, tz = cz + (float)Math.Sin(a) * 1.6f;
+                        if (FreeSpot(tx, tz, 1.7f)) { m.TX = tx; m.TZ = tz; break; }
+                    }
                     m.T = 0f;
                 }
-                Walk(m, m.TX, m.TZ, 0.3f, 0.016f, 0.35f);
+                Walk(m, m.TX, m.TZ, 0.3f, tickDt, 0.35f);   // (antes con 0.016 fijo: con menos fps avanzaba mas lento)
                 return;
             }
             if (!best.Giant) best.ClaimedBy = m.Id;
@@ -1199,14 +1214,16 @@ namespace Mineros.Core
             // anti-atasco (pedido del dueño: "un minero quedo caminando fijo en el lugar"): el desvio alrededor de los
             // edificios podia anular el avance (entre dos edificios o con el destino pegado a otro). Si en 2.5 s no se
             // acerco 25 cm: cerca del destino cuenta como llegado; lejos, cruza el obstaculo 1.6 s sin desviarse.
+            if (Sq(x - m.StuckX, z - m.StuckZ) > 0.09f) { m.StuckX = x; m.StuckZ = z; m.StuckBest = d; m.StuckT = 0f; }   // destino nuevo: se mide de cero
             if (d < m.StuckBest - 0.25f) { m.StuckBest = d; m.StuckT = 0f; }
             else m.StuckT += dt;
             if (m.StuckT > 2.5f)
             {
                 m.StuckT = 0f; m.StuckBest = d;
-                if (d < stop + 1.8f) return true;
+                if (d < stop + 1.8f) { AddStat("unstuck_near_" + m.State, 1); return true; }
                 m.GhostT = 1.6f;
                 AddStat("unstuck", 1);
+                AddStat("unstuck_" + m.State, 1);
             }
             float vx = dx / d, vz = dz / d;
             if (m.GhostT > 0f) m.GhostT -= dt;
@@ -1265,7 +1282,7 @@ namespace Mineros.Core
             {
                 { "v", 5 }, { "cx", ComplexObj() }, { "coins", Coins }, { "earned", TotalEarned }, { "plots", plots }, { "mined", mined },
                 { "gems", Gems }, { "expand", Expand }, { "goal", GoalIdx }, { "seen", LastSeen }, { "stats", StatsObj() },
-                { "spins", Spins }, { "spinstreak", SpinStreak }, { "far", FarObj() }, { "chests", ChestsObj() }, { "day", DayClock },
+                { "spins", Spins }, { "spinstreak", SpinStreak }, { "far", FarObj() }, { "fx", FxObj() }, { "chests", ChestsObj() }, { "day", DayClock },
                 { "miners", MinersObj() }, { "found", FoundObj() }, { "daily", DailyObj() }, { "prog", ProgressObj() },
                 { "city", CityObj() }, { "tut", (int)Tut }, { "shop", ShopObj() },
             });
@@ -1314,6 +1331,7 @@ namespace Mineros.Core
             Spins = JsonRead.Int(d, "spins", 0);
             SpinStreak = JsonRead.Int(d, "spinstreak", 0);
             ReadFar(d);
+            ReadFx(d);
             DayClock = (float)JsonRead.Dbl(d, "day", DayLength * 0.06f) % DayLength;
             object dl;
             if (d.TryGetValue("daily", out dl) && dl is Dictionary<string, object> dd) LoadDaily(dd);

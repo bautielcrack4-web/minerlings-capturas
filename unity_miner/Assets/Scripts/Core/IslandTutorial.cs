@@ -34,6 +34,7 @@ namespace Mineros.Core
             if (next == Tut) return;
             Tut = next;
             AddStat("tut_" + (int)next, 1);
+            if (next == TutStep.Done && Stat("fx_gift") == 0) { AddStat("fx_gift", 1); GiveFxCard((int)FxKind.GoldRock * FxVariants + 19); }   // regalo: Roca de Oro Dorada
             TutAdvanced?.Invoke(next);
         }
 

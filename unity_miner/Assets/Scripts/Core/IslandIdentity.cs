@@ -48,19 +48,87 @@ namespace Mineros.Core
         }
 
         /// <summary>Indice de la cara (0..47) del minero.</summary>
-        public static int FaceOf(Miner m) { return Mix(m.Id, 11) % FaceCount; }
-        public static bool IsWoman(Miner m) { return FaceOf(m) % 3 == 2; }
+        public static int FaceOf(Miner m) { return FaceOfId(m.Id); }
+        public static bool IsWoman(Miner m) { return IsWomanId(m.Id); }
+        public static bool IsWomanId(int id) { return FaceOfId(id) % 3 == 2; }
 
         /// <summary>Nombre y apellido estadounidenses (coinciden con la cara: hombre o mujer).</summary>
-        public static string FullName(Miner m)
+        public static string FullName(Miner m) { return FullNameId(m.Id); }
+        public static string FullNameId(int id)
         {
-            var first = IsWoman(m) ? FemaleNames[Mix(m.Id, 23) % FemaleNames.Length] : MaleNames[Mix(m.Id, 23) % MaleNames.Length];
-            return first + " " + LastNames[Mix(m.Id, 37) % LastNames.Length];
+            var first = IsWomanId(id) ? FemaleNames[Mix(id, 23) % FemaleNames.Length] : MaleNames[Mix(id, 23) % MaleNames.Length];
+            return first + " " + LastNames[Mix(id, 37) % LastNames.Length];
         }
 
-        public static string FirstName(Miner m) { var n = FullName(m); int i = n.IndexOf(' '); return i > 0 ? n.Substring(0, i) : n; }
+        public static string FirstName(Miner m) { return FirstNameId(m.Id); }
+        public static string FirstNameId(int id) { var n = FullNameId(id); int i = n.IndexOf(' '); return i > 0 ? n.Substring(0, i) : n; }
 
         public static string Hometown(Miner m) { return Towns[Mix(m.Id, 53) % Towns.Length]; }
+
+        // ------------------------------------------------------------ rasgos de cada cara (para que el muñeco 3D se parezca a su foto)
+        /// <summary>Piel 0..8 (muy clara a muy oscura), vello 0 nada / 1 bigote / 2 barba de dias / 3 chivita / 4 barba corta /
+        /// 5 barba tupida / 6 barba larga / 7 patillas; color de pelo/barba (hex); anteojos; mujer.</summary>
+        public struct FaceLook
+        {
+            public int Skin, Facial; public string Hair; public bool Glasses, Woman;
+            public FaceLook(int skin, int facial, string hair, int glasses, int woman) { Skin = skin; Facial = facial; Hair = hair; Glasses = glasses == 1; Woman = woman == 1; }
+        }
+
+        /// <summary>Sale de como se generaron las 48 caras (unity_tools: caras.json): misma persona en la foto y en la isla.</summary>
+        public static readonly FaceLook[] Looks =
+        {
+            new FaceLook(2, 0, "2a1d16", 1, 0),
+            new FaceLook(0, 5, "5a3a22", 0, 0),
+            new FaceLook(6, 0, "b8482a", 0, 1),
+            new FaceLook(6, 0, "b8482a", 1, 0),
+            new FaceLook(0, 0, "8a3a1e", 0, 0),
+            new FaceLook(0, 0, "e889b0", 0, 1),
+            new FaceLook(2, 1, "5a3a22", 0, 0),
+            new FaceLook(2, 0, "1f1712", 0, 0),
+            new FaceLook(1, 0, "e889b0", 0, 1),
+            new FaceLook(0, 5, "8a3a1e", 0, 0),
+            new FaceLook(7, 4, "8a3a1e", 0, 0),
+            new FaceLook(2, 0, "5a3a22", 1, 1),
+            new FaceLook(7, 4, "e8e8e8", 0, 0),
+            new FaceLook(8, 2, "2a1d16", 0, 0),
+            new FaceLook(6, 0, "1f1712", 1, 1),
+            new FaceLook(5, 6, "e8e8e8", 0, 0),
+            new FaceLook(7, 1, "9a9a9a", 0, 0),
+            new FaceLook(1, 0, "1f1712", 0, 1),
+            new FaceLook(7, 1, "9a9a9a", 1, 0),
+            new FaceLook(7, 2, "e8e8e8", 0, 0),
+            new FaceLook(0, 0, "5a3a22", 0, 1),
+            new FaceLook(3, 1, "9a9a9a", 0, 0),
+            new FaceLook(7, 7, "2a1d16", 0, 0),
+            new FaceLook(8, 0, "9a9a9a", 0, 1),
+            new FaceLook(6, 2, "d9b25a", 1, 0),
+            new FaceLook(3, 0, "d9b25a", 0, 0),
+            new FaceLook(4, 0, "1f1712", 0, 1),
+            new FaceLook(5, 0, "8a3a1e", 0, 0),
+            new FaceLook(8, 0, "8a3a1e", 0, 0),
+            new FaceLook(6, 0, "8a3a1e", 1, 1),
+            new FaceLook(6, 5, "b8482a", 1, 0),
+            new FaceLook(2, 6, "1f1712", 0, 0),
+            new FaceLook(0, 0, "1f1712", 0, 1),
+            new FaceLook(0, 5, "1f1712", 0, 0),
+            new FaceLook(4, 0, "e8e8e8", 0, 0),
+            new FaceLook(1, 0, "e8e8e8", 0, 1),
+            new FaceLook(4, 2, "1f1712", 1, 0),
+            new FaceLook(4, 2, "9a9a9a", 0, 0),
+            new FaceLook(8, 0, "2a1d16", 0, 1),
+            new FaceLook(4, 3, "9a9a9a", 0, 0),
+            new FaceLook(5, 7, "d9b25a", 0, 0),
+            new FaceLook(3, 0, "1f1712", 0, 1),
+            new FaceLook(3, 7, "d9b25a", 0, 0),
+            new FaceLook(0, 3, "b8482a", 0, 0),
+            new FaceLook(5, 0, "e8e8e8", 0, 1),
+            new FaceLook(1, 1, "d9b25a", 0, 0),
+            new FaceLook(5, 4, "d9b25a", 0, 0),
+            new FaceLook(5, 0, "b8482a", 1, 1)
+        };
+
+        public static int FaceOfId(int minerId) { return Mix(minerId, 11) % FaceCount; }
+        public static FaceLook LookOfId(int minerId) { return Looks[FaceOfId(minerId) % Looks.Length]; }
 
         // ------------------------------------------------------------ entrenar (subir de nivel pagando)
         /// <summary>Precio de subir un nivel al minero: crece con el nivel y con lo que gana la isla.</summary>

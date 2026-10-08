@@ -330,6 +330,7 @@ namespace Mineros.IslandView
                 items.Add(new KeyValuePair<string, string>("coin", "+" + BigNum.Fmt(loot.Coins)));
                 if (loot.Turbo > 0) items.Add(new KeyValuePair<string, string>("speed", Loc.T("Turbo ") + Mathf.RoundToInt(loot.Turbo) + " s"));
                 if (loot.Gems > 0) items.Add(new KeyValuePair<string, string>("gem", "+" + loot.Gems + Loc.T(" gemas")));
+                if (loot.FxCard >= 0) items.Add(new KeyValuePair<string, string>("fx:" + loot.FxCard, Island.FxCatalog[loot.FxCard].Name));
                 int n = items.Count;
                 for (int i = 0; i < n; i++)
                 {
@@ -338,8 +339,18 @@ namespace Mineros.IslandView
                     var card = Kit.OutBox(lootBox, 18, 4, 6, best ? Kit.Cream : Color.white, best ? ChestCol[loot.Tier] : Kit.Out, "Carta");
                     float w = 200f;
                     Kit.Place(card, 0.5f, 0f, (i - (n - 1) * 0.5f) * 214f - w * 0.5f, 0f, w, 180);
-                    var ic = Kit.Icon(card, items[i].Key, 72);
-                    Kit.Place((RectTransform)ic.transform, 0.5f, 0f, -36f, 18f, 72, 72);
+                    if (items[i].Key.StartsWith("fx:"))
+                    {
+                        // carta de efecto: su dibujo
+                        var fi = Kit.Img(card, FxCardArt.Get(int.Parse(items[i].Key.Substring(3))), Color.white, "CartaFx");
+                        fi.preserveAspect = true;
+                        Kit.Place(fi.rectTransform, 0.5f, 0f, -36f, 6f, 72, 100);
+                    }
+                    else
+                    {
+                        var ic = Kit.Icon(card, items[i].Key, 72);
+                        Kit.Place((RectTransform)ic.transform, 0.5f, 0f, -36f, 18f, 72, 72);
+                    }
                     var l = Kit.LabelAt(card, items[i].Value, 28, Kit.Brown, 0, true, 0, 108, w, 50, TextAnchor.MiddleCenter);
                     l.resizeTextForBestFit = true; l.resizeTextMinSize = 18; l.resizeTextMaxSize = 28;
                     if (best)
@@ -350,7 +361,7 @@ namespace Mineros.IslandView
                     }
                     card.localScale = Vector3.zero;
                     float d = 0.3f + i * 0.4f;
-                    string snd = items[i].Key == "gem" ? "gem" : items[i].Key == "coin" ? "coins_pour" : "powerup";
+                    string snd = items[i].Key == "gem" ? "gem" : items[i].Key == "coin" ? "coins_pour" : items[i].Key.StartsWith("fx:") ? "cj_" + items[i].Key.Substring(3) : "powerup";
                     Tw.Scale(card, Vector3.zero, Vector3.one * (best ? 1.08f : 1f), 0.4f, Ease.OutBack, d, () =>
                     {
                         Sfx.Play(snd, -5f);

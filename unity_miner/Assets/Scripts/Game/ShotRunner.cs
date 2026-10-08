@@ -683,9 +683,42 @@ namespace Mineros.Game
                 g.Ui.ShowMiner(cm);
                 for (int f = 0; f < 30; f++) yield return null;
                 Snap("rec_09c_carnet_" + k);
-                Debug.Log("carnet " + k + " " + Island.FullName(cm) + " cara " + Island.FaceOf(cm) + " " + Island.Hometown(cm));
+                g.Ui.CloseMinerCard();
+                g.DebugLook(g.MinerWorld(cm), 3.2f);   // de cerca: la cara 3D (piel, barba, anteojos) igual a la foto
+                for (int f = 0; f < 12; f++) yield return null;
+                Snap("rec_09d_cara3d_" + k);
+                var lk = Island.LookOfId(cm.Id);
+                Debug.Log("carnet " + k + " " + Island.FullName(cm) + " cara " + Island.FaceOf(cm) + " " + Island.Hometown(cm) + " piel " + lk.Skin + " vello " + lk.Facial + " anteojos " + lk.Glasses);
             }
             g.Ui.CloseMinerCard();
+            // cartas de efecto: sobre grande, mano, album y la Roca de Oro jugada
+            {
+                g.Ui.CloseSheet();
+                isl.Gems += 500;
+                var got = isl.OpenPack(true);
+                Debug.Log("cartas sobre: " + string.Join(",", got) + " unicas=" + isl.FxSeenCount);
+                g.Ui.OpenPackUi(got);
+                yield return Wait(1.6f); Snap("cartas_sobre_a");
+                yield return Wait(4.5f); Snap("cartas_sobre_b");
+                g.Ui.DebugPress();
+                yield return Wait(0.6f);
+                isl.GiveFxCard(19); isl.GiveFxCard(4 * Island.FxVariants + 12);
+                g.Ui.OpenHand(false);
+                yield return Wait(1.0f); Snap("cartas_mano");
+                g.Ui.CloseSheet();
+                yield return Wait(0.4f);
+                g.Ui.OpenHand(true);
+                yield return Wait(1.0f); Snap("cartas_album");
+                g.Ui.CloseSheet();
+                g.DebugLook(new Vector3(0f, 0f, 2f), 8f);
+                yield return Wait(0.5f);
+                g.Ui.PlayCardFly(19);
+                yield return Wait(0.3f); Snap("cartas_vuela");
+                yield return Wait(1.6f); Snap("cartas_roca_oro");
+                g.Ui.PlayCardFly(4 * Island.FxVariants + 12);
+                yield return Wait(1.1f); Snap("cartas_fuente");
+                Debug.Log("cartas jugadas=" + isl.Stat("fx_played") + " en mano=" + isl.FxHandCount);
+            }
             // 4) el Cuartel: catalogo de una parcela libre, obra, revelacion
             isl.Coins = System.Math.Max(isl.Coins, 5000);
             for (int i = 0; i < isl.Stock.Length; i++) isl.Stock[i] = System.Math.Max(isl.Stock[i], 200);
@@ -1726,6 +1759,16 @@ namespace Mineros.Game
 
         static IEnumerator Wait(float s) { return new WaitForSecondsRealtime(s); }
 
+        // latido: si una captura se cuelga, el registro dice en que paso estaba (la tanda 17 se corto sin pistas)
+        float beatT;
+        static string lastSnap = "-";
+        void LateUpdate()
+        {
+            if (Time.realtimeSinceStartup - beatT < 15f) return;
+            beatT = Time.realtimeSinceStartup;
+            Debug.Log("latido t=" + Time.realtimeSinceStartup.ToString("0") + " ultima=" + lastSnap + " fps=" + (1f / Mathf.Max(Time.unscaledDeltaTime, 1e-4f)).ToString("0.0"));
+        }
+
         /// <summary>Adelanta la simulacion `secs` segundos de juego de golpe (los cuadros en la nube son lentos).</summary>
         static void Advance(Island isl, float secs) { for (float t = 0f; t < secs; t += 0.1f) isl.Tick(0.1f); }
 
@@ -1885,7 +1928,7 @@ namespace Mineros.Game
 
         void Snap(string name)
         {
-            lastShot = name; shotCount++;
+            lastShot = name; shotCount++; lastSnap = name;
             try { Save(Path.Combine(outDir, name + ".png")); }
             catch (System.Exception e) { Debug.LogException(e); }
         }

@@ -66,6 +66,7 @@ namespace Mineros.IslandView
             public Transform Sack;
             public int SackKind = -1;
             public float Phase, BlinkT, Celebrate, DustT, Lean, FxT, TrailT, StepT;
+            public Vector3 LastPos;
             public bool Arriving;        // llega como chispa: invisible hasta que la chispa toca el suelo
             public int StepSide = 1;
             public MeshRenderer Lamp;
@@ -141,6 +142,7 @@ namespace Mineros.IslandView
             Ambient = gameObject.AddComponent<IslandAmbient>();
             Ambient.Init(this, root);
             InitFar();   // isla lejana, niebla y balsa
+            InitFxCards();   // cartas de efecto
             IslandStage.Create(transform);
             Ui = gameObject.AddComponent<IslandUi>();   // antes que los mineros: AddMiner usa la UI
             Ui.Init(this);
@@ -335,7 +337,7 @@ namespace Mineros.IslandView
                         }
                     // las paredes del lado de la camara tambien se abren con el zoom (zocalo sobre la losa)
                     foreach (var tr in inner.GetComponentsInChildren<Transform>(true))
-                        if (tr.name == "Paredes") MakeWallsCuttable(tr, v.Root.position.y + IslandArt.SlabH * inner.localScale.y);
+                        if (tr.name.StartsWith("Paredes")) MakeWallsCuttable(tr, v.Root.position.y + IslandArt.SlabH * inner.localScale.y);   // RoomKit las llama "ParedesKit"
                     v.Model = inner.GetComponentInChildren<MeshRenderer>();
                 }
                 else
@@ -472,6 +474,7 @@ namespace Mineros.IslandView
             ores[o.Id] = v;
             if (o.Age < 0.1f && !o.Sky && !o.Giant) v.Mound = MakeMound(t);
             if (o.Far) t.localScale = Vector3.one * OreScale(o);   // roca exclusiva de la isla lejana
+            DressFancyOre(v);   // roca de carta: color, halo y tamaño
             if (o.Giant)
             {
                 t.localScale = Vector3.one * (o.Legendary ? 3.5f : 2.8f);
@@ -680,7 +683,12 @@ namespace Mineros.IslandView
                 t.localPosition = Vector3.Lerp(t.localPosition, target, 1f - Mathf.Exp(-dt * 20f));
                 float perf = Isl.Perf(m);
                 // el paso va con el tamaño: un minero mas chico da mas pasos por metro
-                if (m.Moving) mv.Phase += dt * 11f * perf * Isl.WalkMult(m) * (1.3f / MinerScale) * 0.8f;
+                // los pasos siguen a lo que de verdad avanza (antes iban a velocidad completa aunque paseara lento o
+                // estuviera trabado: se veia "caminando fijo en el lugar")
+                Vector3 now = new Vector3(m.X, 0f, m.Z);
+                float moved = (now - mv.LastPos).magnitude;
+                mv.LastPos = now;
+                if (m.Moving && moved < 1.5f) mv.Phase += moved * 11f * 0.8f * (1.3f / MinerScale) / Island.WalkSpeed;
                 float swing = m.State == MState.Mining || (m.State == MState.FarWork && !m.Moving) ? Mathf.Repeat(m.HitT / Island.HitInterval + 0.38f, 1f)
                     : m.State == MState.Digging ? Mathf.Repeat(m.HitT / 0.6f, 1f)
                     : m.State == MState.Building ? Mathf.Repeat(m.HitT / 0.45f + m.Id * 0.3f, 1f) : -1f;   // cavar y martillar
