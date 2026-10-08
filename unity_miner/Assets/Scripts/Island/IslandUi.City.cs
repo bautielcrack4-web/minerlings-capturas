@@ -447,19 +447,33 @@ namespace Mineros.IslandView
             var icon = Kit.Img(fr, IslandStage.I.BuildingIcon(k, Island.Tier(Mathf.Max(1, p.Level))), Color.white, "Modelo");
             icon.preserveAspect = true;
             Kit.PlaceTL(icon.rectTransform, 24, 16, 140, 140);
-            Kit.LabelAt(fr, d.Name, 38, Kit.Brown, 0, true, 170, 24, 480, 48);
+            var nameL = Kit.LabelAt(fr, d.Name, 38, Kit.Brown, 0, true, 170, 24, 400, 48);
             int cap = Isl.LevelCap(k);
-            string lvTxt = p.Level == 0 ? Loc.T("En construcción") : Loc.T("Nivel ") + p.Level + (p.Level >= d.MaxLevel ? Loc.T(" (máximo)") : Loc.T("  ·  tope ") + cap);
-            Kit.LabelAt(fr, lvTxt, 26, Kit.OrangeD, 0, true, 170, 74, 480, 34);
-            var desc = Kit.LabelAt(fr, d.Desc, 22, Kit.Brown, 0, false, 170, 108, 480, 56);
+            // nivel sin palabras: estrella + "2/3" (o martillo mientras se construye)
+            var lvIc = Kit.Icon(fr, p.Level == 0 ? "hammer" : "star", 34);
+            Kit.PlaceTL((RectTransform)lvIc.transform, 170, 74, 34, 34);
+            string lvTxt = p.Level == 0 ? "…" : p.Level + " / " + (p.Level >= d.MaxLevel ? d.MaxLevel : cap);
+            Kit.LabelAt(fr, lvTxt, 28, Kit.OrangeD, 0, true, 210, 72, 200, 38);
+            // la descripcion queda detras de la (i): los jugadores no quieren leer, pero esta si la piden
+            var desc = Kit.LabelAt(fr, d.Desc, 22, Kit.Brown, 0, false, 170, 112, 480, 56);
             Kit.Wrap(desc);
+            desc.gameObject.SetActive(false);
+            var info = Kit.RoundImg(fr, 18, new Color(0.45f, 0.36f, 0.28f, 0.9f), "Info");
+            info.raycastTarget = true;
+            Kit.PlaceTL(info.rectTransform, 170 + Mathf.Min(nameL.preferredWidth, 400f) + 12f, 32, 36, 36);
+            var il = Kit.Label(info.transform, "i", 24, Color.white, 0, true, TextAnchor.MiddleCenter);
+            Kit.Stretch(il.rectTransform);
+            info.gameObject.AddComponent<Btn>().Clicked += () => { desc.gameObject.SetActive(!desc.gameObject.activeSelf); if (desc.gameObject.activeSelf) Tw.Pop(desc.rectTransform, 1.05f); };
             var famTag = Kit.MakeTag(fr, FamilyName(d.Family), IslandArt.FamilyRoof(k), 16);
             Kit.PlaceTL(famTag, 26, 150, 136, 28);
             if (Isl.Movable(p) && p.Level >= 1)
             {
                 // mover el edificio (tambien se puede manteniendolo apretado en la isla)
-                var mv = Kit.Button(fr, Loc.T("Mover"), Kit.Blue, 20, 112, 46, Loc.T("Mover"));
-                Kit.Place((RectTransform)mv.transform, 1f, 0f, -132f, 20f, 112, 46);
+                var mv = Kit.Button(fr, "", Kit.Blue, 20, 64, 56, Loc.T("Mover"));
+                Kit.Place((RectTransform)mv.transform, 1f, 0f, -84f, 18f, 64, 56);
+                var mvi = Kit.Icon(mv.Content, "expand", 40);   // flechas en cruz = mover
+                Kit.PlaceTL((RectTransform)mvi.transform, 12, 6, 40, 40);
+                mvi.transform.localRotation = Quaternion.Euler(0, 0, 45f);
                 var pp = p;
                 mv.Clicked += () => { CloseSheet(); game.BeginMove(pp); };
             }
@@ -516,7 +530,9 @@ namespace Mineros.IslandView
             Kit.Stretch(box, 4, 4, 4, 4);
             var ic = Kit.Img(box, Icons.Get("hammer"), Color.white, "Icono");
             Kit.PlaceTL(ic.rectTransform, 14, 14, 56, 56);
-            var title = Kit.LabelAt(box, p.Level == 0 ? Loc.T("Construyendo…") : Loc.T("Mejorando a nivel ") + (p.Level + 1) + "…", 26, Kit.Brown, 0, true, 80, 12, 400, 34);
+            var tStar = Kit.Icon(box, p.Level == 0 ? "hammer" : "star", 30);
+            Kit.PlaceTL((RectTransform)tStar.transform, 80, 14, 30, 30);
+            var title = Kit.LabelAt(box, p.Level == 0 ? "…" : (p.Level + 1).ToString(), 26, Kit.Brown, 0, true, 116, 12, 260, 34);
             var left = Kit.LabelAt(box, "", 30, Kit.OrangeD, 0, true, 80, 44, 300, 38);
             var bar = Kit.OutBox(box, 10, 3, 0, Icons.H("d8c6a2"), Kit.Out, "Barra");
             Kit.PlaceTL(bar, 16, 92, 600, 26);
@@ -554,6 +570,7 @@ namespace Mineros.IslandView
             var hint = Kit.LabelAt(box, Loc.T("Las obras de 5 minutos o menos se terminan gratis."), 18, Kit.Brown, 0, false, 16, 134, 360, 52);
             Kit.Wrap(hint);
             hint.alignment = TextAnchor.MiddleLeft;
+            hint.gameObject.SetActive(Isl.Stat("speedups") < 2);   // se explica las primeras veces, despues se sabe
             if (p.Work > Island.FreeFinish && Isl.CanAd(AdPlace.WorkCut, IslandGame.Today, Now))
             {
                 var ad = AdButton(box, Loc.T("-30 min"), 220, 56, 22);
@@ -874,14 +891,38 @@ namespace Mineros.IslandView
             var d = Island.Def(k);
             var bar = Kit.OutBox(fr, 18, 4, 5, Kit.Cream, Kit.Out, "Mejorar");
             Kit.Place(bar, 0f, 1f, 20f, -206f, 640, 180);
-            if (p.Level == 0) { Kit.LabelAt(bar, Loc.T("Se está construyendo…"), 26, Kit.Brown, 0, true, 0, 60, 640, 40, TextAnchor.MiddleCenter); return; }
-            if (p.Level >= d.MaxLevel) { Kit.LabelAt(bar, Loc.T("¡Nivel máximo!"), 30, Kit.GreenD, 0, true, 0, 60, 640, 40, TextAnchor.MiddleCenter); return; }
-            if (p.Level >= Isl.LevelCap(k))
+            if (p.Level == 0)
             {
-                Kit.LabelAt(bar, Loc.T("Subí el Ayuntamiento para mejorarlo más"), 24, Kit.OrangeD, 0, true, 0, 60, 640, 40, TextAnchor.MiddleCenter);
+                var hi = Kit.Icon(bar, "hammer", 70);
+                Kit.Place((RectTransform)hi.transform, 0.5f, 0f, -35f, 50f, 70, 70);
                 return;
             }
-            Kit.LabelAt(bar, Loc.T("Mejorar a nivel ") + (p.Level + 1), 24, Kit.Brown, 0, true, 16, 10, 400, 32);
+            if (p.Level >= d.MaxLevel)
+            {
+                // nivel maximo: sello + MAX
+                var mi = Kit.Icon(bar, "stamp", 84);
+                Kit.Place((RectTransform)mi.transform, 0.5f, 0f, -110f, 46f, 84, 84);
+                Kit.LabelAt(bar, "MAX", 44, Kit.GreenD, 0, true, 330, 60, 200, 56, TextAnchor.MiddleLeft);
+                return;
+            }
+            if (p.Level >= Isl.LevelCap(k))
+            {
+                // tope: candado + el Ayuntamiento (se entiende sin leer: "subí el Ayuntamiento")
+                var li = Kit.Icon(bar, "lock", 64);
+                Kit.Place((RectTransform)li.transform, 0.5f, 0f, -150f, 56f, 64, 64);
+                var ai = Kit.Icon(bar, "arrow", 44);
+                Kit.Place((RectTransform)ai.transform, 0.5f, 0f, -60f, 66f, 44, 44);
+                var th = Kit.Img(bar, IslandStage.I.BuildingIcon(BKind.Depot, Island.Tier(Mathf.Max(1, Isl.Th))), Color.white, "Ayuntamiento");
+                th.preserveAspect = true;
+                Kit.Place(th.rectTransform, 0.5f, 0f, 0f, 24f, 130, 130);
+                return;
+            }
+            // mejorar: flecha + estrella + el nivel que viene
+            var upI = Kit.Icon(bar, "arrow", 32);
+            Kit.PlaceTL((RectTransform)upI.transform, 16, 8, 32, 32);
+            var upS = Kit.Icon(bar, "star", 30);
+            Kit.PlaceTL((RectTransform)upS.transform, 50, 9, 30, 30);
+            Kit.LabelAt(bar, (p.Level + 1).ToString(), 28, Kit.Brown, 0, true, 84, 6, 100, 36);
             TimeTag(bar, 16, 44, Dur(Isl.WorkSeconds(k, p.Level + 1)), 20);
             MatsRow(bar, 16, 84, Isl.MatsFor(k, p.Level + 1), 44f);
             var b = Kit.Button(bar, "", Kit.Green, 28, 230, 100);

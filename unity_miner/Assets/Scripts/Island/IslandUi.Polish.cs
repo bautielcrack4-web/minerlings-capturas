@@ -36,8 +36,11 @@ namespace Mineros.IslandView
         public static void AddShine(Btn b, System.Func<bool> when)
         {
             if (b == null || b.GetComponent<ShineSweep>() != null) return;
-            if (b.GetComponent<RectMask2D>() == null) b.gameObject.AddComponent<RectMask2D>();
-            var img = Kit.Img(b.transform, ShineSprite(), Color.white, "Brillo");
+            // mascara solo para el brillo (antes la del boton entero recortaba los iconos que asoman del borde)
+            var clip = Kit.New("BrilloClip", b.transform);
+            Kit.Stretch(clip);
+            clip.gameObject.AddComponent<RectMask2D>();
+            var img = Kit.Img(clip, ShineSprite(), Color.white, "Brillo");
             img.raycastTarget = false;
             var s = b.gameObject.AddComponent<ShineSweep>();
             s.Bar = img.rectTransform;

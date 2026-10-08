@@ -130,6 +130,7 @@ namespace Mineros.IslandView
                 CollectLife(f, kitRoofs, cxRoofs[f].transform);
                 RoomKit.Bake(kitRoofs, cxRoofs[f].transform, "Techos", true);
                 MakeRoofsCuttable(f);   // antes de las losas: esas no se disuelven
+                MakeWallsCuttable(cxWalls[f].transform, cxFloor[f].position.y + IslandArt.SlabH);   // y las paredes del lado de la camara
                 if (slabs.TriCount > 0) IslandArt.Bake(slabs, cxRoofs[f].transform, "Losas", true);
             }
             cxMods.Clear(); cxProps.Clear();

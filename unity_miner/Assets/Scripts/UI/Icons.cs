@@ -627,6 +627,47 @@ namespace Mineros.UI
                     p.Line(c + V(-10, 1) * k, c + V(-3, 8) * k, 3.4f * k, H("5cc84a"), true);
                     p.Line(c + V(-3, 8) * k, c + V(11, -8) * k, 3.4f * k, H("5cc84a"), true);
                     break;
+                case "expand":   // ampliar: cuatro flechas hacia las esquinas
+                    for (int q = 0; q < 4; q++)
+                    {
+                        float sx = q % 2 == 0 ? -1f : 1f, sy = q < 2 ? -1f : 1f;
+                        Vector2 tip = c + V(sx * 17f, sy * 17f) * k;
+                        Vector2[] tri = { tip, tip + V(-sx * 11f, 0f) * k, tip + V(0f, -sy * 11f) * k };
+                        p.OPoly(tri, Color.white, 2.5f);
+                        p.Line(tip + V(-sx * 4f, -sy * 4f) * k, c + V(sx * 4f, sy * 4f) * k, 5.5f * k, Out, true);
+                        p.Line(tip + V(-sx * 4f, -sy * 4f) * k, c + V(sx * 4f, sy * 4f) * k, 3f * k, Color.white, true);
+                    }
+                    break;
+                case "stamp":   // sello de hecho: disco verde con borde dentado y tilde blanco
+                {
+                    Vector2[] st = new Vector2[32];
+                    for (int i = 0; i < 32; i++)
+                    {
+                        float a = Mathf.PI * 2f * i / 32f;
+                        float rr = (i % 2 == 0 ? 19f : 17f) * k;
+                        st[i] = c + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * rr;
+                    }
+                    p.OPoly(st, H("4cc25a"), 2.5f);
+                    p.Ellipse(c, V(13.5f, 13.5f) * k, H("3aa84a"), 24);
+                    p.Line(c + V(-7, 0) * k, c + V(-2, 6) * k, 4.2f * k, Color.white, true);
+                    p.Line(c + V(-2, 6) * k, c + V(8, -6) * k, 4.2f * k, Color.white, true);
+                    break;
+                }
+                case "drop":   // gota (limpieza): punta arriba, panza abajo
+                {
+                    Vector2 o = c + V(0, 5) * k;
+                    float r = 11f * k;
+                    Vector2[] d = new Vector2[19];
+                    d[0] = c + V(0, -16) * k;
+                    for (int i = 0; i < 18; i++)
+                    {
+                        float a = Mathf.Lerp(-55f, 235f, i / 17f) * Mathf.Deg2Rad;
+                        d[i + 1] = o + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                    }
+                    p.OPoly(d, H("4aa3f0"), 2.5f);
+                    p.Circle(c + V(-4, 7) * k, 2.6f * k, new Color(1, 1, 1, 0.8f));
+                    break;
+                }
                 default:
                     p.Circle(c, 10f * k, Color.magenta);
                     break;

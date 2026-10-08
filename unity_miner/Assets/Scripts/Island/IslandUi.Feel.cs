@@ -75,12 +75,21 @@ namespace Mineros.IslandView
         /// <summary>Un brillo diagonal barre la capsula de izquierda a derecha (recortado por una mascara).</summary>
         void PillShine(RectTransform pill)
         {
-            if (pill.GetComponent<RectMask2D>() == null) pill.gameObject.AddComponent<RectMask2D>();
-            var shine = pill.Find("Barrido") as RectTransform;
+            // la mascara va en una capa propia: antes recortaba la capsula entera y la moneda (que asoma por la
+            // izquierda) se veia cortada
+            var clip = pill.Find("BarridoClip") as RectTransform;
+            if (clip == null)
+            {
+                clip = Kit.New("BarridoClip", pill);
+                Kit.Stretch(clip);
+                clip.gameObject.AddComponent<RectMask2D>();
+                clip.SetSiblingIndex(0);
+            }
+            var shine = clip.Find("Barrido") as RectTransform;
             Image im;
             if (shine == null)
             {
-                im = Kit.Img(pill, Icons.Glow(), new Color(1f, 1f, 1f, 0.55f), "Barrido");
+                im = Kit.Img(clip, Icons.Glow(), new Color(1f, 1f, 1f, 0.55f), "Barrido");
                 shine = im.rectTransform;
                 shine.anchorMin = shine.anchorMax = new Vector2(0f, 0.5f);
                 shine.sizeDelta = new Vector2(46f, 110f);
@@ -164,6 +173,7 @@ namespace Mineros.IslandView
         /// <summary>Tocar el suelo deja un anillo de polvo; el agua, una onda; un arbol, lo sacude.</summary>
         public void GroundTap(Vector2 screen, Vector3 ground, bool water)
         {
+            CloseMinerCard();   // tocar el suelo cierra el carnet
             Vector2 p = ScreenToLayer(screen);
             var ring = UiPool.Get(flyLayer, Icons.Ring(4f), water ? new Color(0.85f, 0.95f, 1f, 0.9f) : new Color(1f, 0.95f, 0.85f, 0.8f), "Onda");
             var rt = ring.rectTransform;

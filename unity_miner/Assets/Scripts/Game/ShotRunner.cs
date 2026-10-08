@@ -351,6 +351,30 @@ namespace Mineros.Game
                 g.DebugLook(Vector3.zero, 15.2f);
                 yield return Wait(0.5f);
             }
+            // cada nivel se ve: la Casa y la Fundicion del 1 al 10, y un cuadro de la ceremonia de nivel
+            foreach (var kk in new[] { BKind.House, BKind.Foundry })
+            {
+                var lp = isl.Find(kk);
+                if (lp == null) continue;
+                int keep = lp.Level;
+                Vector3 lw = g.PlotWorld(lp);
+                for (int lv = 1; lv <= 10; lv++)
+                {
+                    g.DebugSetLevel(lp, lv);
+                    g.DebugLook(lw, 6.8f);
+                    for (int f = 0; f < 6; f++) yield return null;
+                    Snap("nivel_" + kk.ToString().ToLower() + "_" + lv.ToString("00"));
+                }
+                g.DebugSetLevel(lp, 4);
+                for (int f = 0; f < 4; f++) yield return null;
+                g.DebugLevelUp(lp, 5);
+                yield return Wait(0.62f); Snap("nivel_" + kk.ToString().ToLower() + "_ceremonia_a");
+                yield return Wait(0.5f); Snap("nivel_" + kk.ToString().ToLower() + "_ceremonia_b");
+                yield return Wait(1.2f);
+                g.DebugSetLevel(lp, keep);
+                g.DebugLook(Vector3.zero, 15.2f);
+                yield return Wait(0.3f);
+            }
             g.Ui.OpenMenu();
             for (int f = 0; f < 30; f++) yield return null;
             Snap("ciudad_menu");
@@ -650,6 +674,17 @@ namespace Mineros.Game
             for (int f = 0; f < 40; f++) yield return null;
             Snap("rec_09_minero_llego");
             Log("invocacion");
+            // carnet del minero (sin desenfoque): tres mineros distintos, cada uno con su cara y su nombre
+            for (int k = 0; k < Mathf.Min(3, isl.Miners.Count); k++)
+            {
+                var cm = isl.Miners[isl.Miners.Count - 1 - k];
+                g.DebugLook(g.MinerWorld(cm), 7f);
+                g.Ui.ShowMiner(cm);
+                for (int f = 0; f < 30; f++) yield return null;
+                Snap("rec_09c_carnet_" + k);
+                Debug.Log("carnet " + k + " " + Island.FullName(cm) + " cara " + Island.FaceOf(cm) + " " + Island.Hometown(cm));
+            }
+            g.Ui.CloseMinerCard();
             // 4) el Cuartel: catalogo de una parcela libre, obra, revelacion
             isl.Coins = System.Math.Max(isl.Coins, 5000);
             for (int i = 0; i < isl.Stock.Length; i++) isl.Stock[i] = System.Math.Max(isl.Stock[i], 200);

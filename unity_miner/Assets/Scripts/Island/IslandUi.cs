@@ -241,10 +241,11 @@ namespace Mineros.IslandView
         void BuildButtons()
         {
             // abajo, chicos: el costo del turbo se ve recien al tocarlo (primer toque pregunta, el segundo compra)
+            // sin palabras (pedido del dueño): rayo solo; el texto aparece nada mas para el reloj o el precio
             turboBtn = Kit.Button(hudLayer, "", Kit.Purple, 24, 150, 64, Loc.T("Turbo"));
             Kit.Place((RectTransform)turboBtn.transform, 0f, 1f, 20f, -86f, 150, 64);
-            var ti = Kit.Icon(turboBtn.Content, "speed", 34);
-            Kit.PlaceTL((RectTransform)ti.transform, 10, 11, 34, 34);
+            turboIcon = Kit.Icon(turboBtn.Content, "speed", 40);
+            Kit.PlaceTL((RectTransform)turboIcon.transform, 55, 8, 40, 40);
             turboL = turboBtn.Label;
             turboL.alignment = TextAnchor.MiddleCenter;
             Kit.Stretch(turboL.rectTransform, 44, 0, 6, 4);
@@ -265,17 +266,24 @@ namespace Mineros.IslandView
 
             // Plan Pueblo: un boton "Construir" abajo al centro reemplaza los "+" del mapa (fuera del tutorial). Abre el
             // catalogo y el edificio elegido se arrastra a cualquier lugar libre de la isla.
-            buildBtn = Kit.Button(hudLayer, "", Kit.Orange, 24, 180, 76, Loc.T("Construir"));
-            Kit.Place((RectTransform)buildBtn.transform, 0.5f, 1f, -90f, -98f, 180, 76);
-            var bi = Kit.Icon(buildBtn.Content, "hammer", 38);
-            Kit.PlaceTL((RectTransform)bi.transform, 12, 18, 38, 38);
-            buildBtn.Label.text = Loc.T("Construir");
-            buildBtn.Label.alignment = TextAnchor.MiddleCenter;
-            Kit.Stretch(buildBtn.Label.rectTransform, 46, 0, 8, 4);
+            // boton grande y redondo con el martillo, sin texto
+            buildBtn = Kit.Button(hudLayer, "", Kit.Orange, 24, 120, 104, Loc.T("Construir"));
+            Kit.Place((RectTransform)buildBtn.transform, 0.5f, 1f, -60f, -122f, 120, 104);
+            var bi = Kit.Icon(buildBtn.Content, "hammer", 64);
+            Kit.PlaceTL((RectTransform)bi.transform, 28, 14, 64, 64);
+            buildBtn.Label.text = "";
             buildBtn.Clicked += () =>
             {
-                Plot free = null;
-                foreach (var p in Isl.Plots) if (p.Ring <= Isl.Expand && Isl.Offered(p)) { free = p; break; }
+                // el lugar libre mas cercano a lo que se esta mirando (antes: el primero de la lista, y la camara
+                // saltaba hasta ahi)
+                Plot free = null; float best = float.MaxValue;
+                Vector3 look = game.ScreenToGround(new Vector2(game.Cam.pixelWidth * 0.5f, game.Cam.pixelHeight * 0.55f));
+                foreach (var p in Isl.Plots)
+                {
+                    if (p.Ring > Isl.Expand || !Isl.Offered(p)) continue;
+                    float dd = (game.PlotWorld(p) - look).sqrMagnitude;
+                    if (dd < best) { best = dd; free = p; }
+                }
                 if (free == null) { Toast(Loc.T("No queda lugar: ampliá la isla"), Kit.Gray); NoMoney(buildBtn); return; }
                 OpenCatalog(free);
             };
@@ -284,10 +292,14 @@ namespace Mineros.IslandView
             expandBtn = Kit.Button(hudLayer, "", Kit.Blue, 22, 190, 64, "Ampliar");
             Kit.Place((RectTransform)expandBtn.transform, 1f, 1f, -210f, -86f, 190, 64);
             expandL = expandBtn.Label;
-            expandL.alignment = TextAnchor.MiddleCenter;
-            Kit.Stretch(expandL.rectTransform, 0, 4, 0, 24);
-            expandPrice = Kit.Label(expandBtn.Content, "", 17, new Color(1f, 1f, 1f, 0.85f), 0, true, TextAnchor.MiddleCenter, "Precio");
-            Kit.Stretch(expandPrice.rectTransform, 0, 34, 0, 8);
+            expandL.text = "";
+            // flechas hacia afuera + moneda + precio (sin "Expandir isla")
+            var ei = Kit.Icon(expandBtn.Content, "expand", 40);
+            Kit.PlaceTL((RectTransform)ei.transform, 10, 8, 40, 40);
+            var ec = Kit.Icon(expandBtn.Content, "coin", 26);
+            Kit.PlaceTL((RectTransform)ec.transform, 58, 15, 26, 26);
+            expandPrice = Kit.Label(expandBtn.Content, "", 24, Color.white, 5, true, TextAnchor.MiddleLeft, "Precio");
+            Kit.PlaceTL(expandPrice.rectTransform, 88, 6, 100, 44);
             expandBtn.Clicked += () =>
             {
                 if (Isl.DoExpand()) game.Save();
@@ -296,6 +308,7 @@ namespace Mineros.IslandView
         }
 
         Btn buildBtn;
+        IconView turboIcon;
 
         void RefreshButtons()
         {
@@ -315,16 +328,21 @@ namespace Mineros.IslandView
                 float k = 1f + Mathf.Sin(Time.time * 8f) * 0.03f;
                 if (!turboBtn.IsPressed && Time.unscaledTime > turboBtn.QuietUntil) turboBtn.transform.localScale = Vector3.one * k;
             }
-            else tt = Time.unscaledTime < turboAskUntil ? Island.TurboGems + Loc.T(" gemas") : Loc.T("Turbo");
-            if (turboL.text != tt) turboL.text = tt;
+            else tt = Time.unscaledTime < turboAskUntil ? "" + Island.TurboGems : "";
+            if (turboL.text != tt)
+            {
+                turboL.text = tt;
+                // con numero: rayo a la izquierda (o gema, si esta preguntando el precio); sin numero: rayo al centro
+                bool asking = Time.unscaledTime < turboAskUntil && Isl.TurboT <= 0f;
+                turboIcon.SetKind(asking ? "gem" : "speed");
+                Kit.PlaceTL((RectTransform)turboIcon.transform, tt == "" ? 55 : 8, 8, 40, 40);
+            }
             turboL.fontSize = Time.unscaledTime < turboAskUntil ? 20 : 22;
             bool canMore = Isl.Expand < Island.ExpandCost.Length;
             bool show = canMore && Isl.TotalEarned >= Isl.ExpandPrice() * 0.35;
             if (expandBtn.gameObject.activeSelf != show) { expandBtn.gameObject.SetActive(show); if (show) Tw.Pop(expandBtn.transform, 1.3f); }
             if (show)
             {
-                expandL.text = Loc.T("Expandir isla");
-                expandL.fontSize = 22;
                 expandPrice.text = BigNum.Fmt(Isl.ExpandPrice());
                 Color m = Isl.CanExpand() ? Color.white : new Color(0.8f, 0.8f, 0.85f);
                 if (expandBtn.Modulate != m) { expandBtn.Modulate = m; expandBtn.Restyle(); }
@@ -535,7 +553,7 @@ namespace Mineros.IslandView
         }
 
         // ------------------------------------------------------------ mineros
-        public static string MinerName(Miner m) { return Island.Char(m).Name; }
+        public static string MinerName(Miner m) { return Island.FirstName(m); }
 
         static string StateText(Miner m)
         {
@@ -559,7 +577,10 @@ namespace Mineros.IslandView
         }
 
         /// <summary>Tarjeta del minero tocado: nombre, que esta haciendo, energia, limpieza y rendimiento.</summary>
-        public void ShowMiner(Miner m)
+        public void ShowMiner(Miner m) { ShowMinerCard(m); }
+
+        /// <summary>La hoja vieja del minero (queda para el album y las pruebas; el toque abre el carnet).</summary>
+        public void ShowMinerSheet(Miner m)
         {
             var c = Island.Char(m);
             Color rc = IslandGame.HelmetOf(m);
@@ -640,25 +661,54 @@ namespace Mineros.IslandView
             if (giantMark == null)
             {
                 giantMarkFor = giant.Id;
-                giantMark = Kit.MakeTag(worldLayer, giant.Boss ? Loc.T("¡GOLEM DE ROCA!") : giant.Legendary ? Loc.T("¡LEGENDARIO! x5") : Loc.T("¡VETA GIGANTE!"),
-                    giant.Boss ? new Color(0.55f, 0.5f, 0.5f) : giant.Legendary ? new Color(0.25f, 0.6f, 0.95f) : Kit.Orange, 24);
+                // globito con icono (sin texto, pedido del dueño): disco del color del evento, pico o golem adentro,
+                // una punta que señala la veta (o el borde por donde esta, si no se ve). Se toca para ir.
+                Color col = giant.Boss ? new Color(0.55f, 0.5f, 0.5f) : giant.Legendary ? new Color(0.25f, 0.6f, 0.95f) : Kit.Orange;
+                giantMark = Kit.New("Globito", worldLayer);
+                giantMark.sizeDelta = new Vector2(84, 84);
+                giantTail = Kit.RoundImg(giantMark, 5, col, "Punta").rectTransform;
+                giantTail.sizeDelta = new Vector2(30, 30);
+                giantTail.localRotation = Quaternion.Euler(0, 0, 45f);
+                var ring = Kit.RoundImg(giantMark, 42, Color.white, "Aro");
+                Kit.Stretch(ring.rectTransform);
+                var disc = Kit.RoundImg(giantMark, 37, col, "Disco");
+                Kit.Stretch(disc.rectTransform, 5, 5, 5, 5);
+                disc.raycastTarget = true;
+                var ic = Kit.Icon(giantMark, giant.Boss ? "boss" : "pick", 54);
+                var irt = (RectTransform)ic.transform;
+                irt.anchorMin = irt.anchorMax = new Vector2(0.5f, 0.5f);
+                irt.anchoredPosition = new Vector2(0f, 2f);
+                if (giant.Legendary)
+                {
+                    var bx = Kit.RoundImg(giantMark, 13, Kit.Yellow, "x5");
+                    var brt = bx.rectTransform;
+                    brt.anchorMin = brt.anchorMax = new Vector2(1f, 1f);
+                    brt.sizeDelta = new Vector2(50, 30);
+                    brt.anchoredPosition = new Vector2(-4f, -6f);
+                    var bl = Kit.Label(bx.transform, "x5", 20, Color.white, 4, true, TextAnchor.MiddleCenter);
+                    Kit.Stretch(bl.rectTransform);
+                }
                 Tw.Pop(giantMark, 1.5f);
-                // la camara ya no salta sola hasta la veta: el cartel (pegado al borde si no se ve) se toca para ir
-                var gi = giantMark.GetComponent<Image>();
-                if (gi != null) gi.raycastTarget = true;
-                var gb = giantMark.gameObject.AddComponent<Btn>();
+                // la camara ya no salta sola hasta la veta: el globito (pegado al borde si no se ve) se toca para ir
+                var gb = disc.gameObject.AddComponent<Btn>();
                 var g0 = giant;
                 gb.Clicked += () => game.Reveal(new Vector3(g0.X, 0f, g0.Z));
             }
             Vector2 c = ToCanvas(new Vector3(giant.X, 4.6f, giant.Z));
             Vector2 cs = Kit.CanvasSize;
-            // si sale de la pantalla, se pega al borde para que se sepa hacia donde ir
-            float hx = cs.x * 0.5f - 140f, hy = cs.y * 0.5f - 230f;
-            Vector2 p = new Vector2(Mathf.Clamp(c.x, -hx, hx), Mathf.Clamp(-c.y, -hy + 120f, hy));
+            // si sale de la pantalla, se pega al borde y la punta señala hacia donde esta
+            float hx = cs.x * 0.5f - 80f, hy = cs.y * 0.5f - 230f;
+            Vector2 real = new Vector2(c.x, -c.y);
+            Vector2 p = new Vector2(Mathf.Clamp(real.x, -hx, hx), Mathf.Clamp(real.y, -hy + 120f, hy));
+            Vector2 dir = real - p;
+            if (dir.sqrMagnitude < 4f) dir = Vector2.down;
+            giantTail.anchoredPosition = dir.normalized * 40f;
             float pulse = 1f + Mathf.Sin(Time.time * 6f) * 0.05f;
-            giantMark.anchoredPosition = p + new Vector2(0f, Mathf.Abs(Mathf.Sin(Time.time * 3f)) * 8f);
+            giantMark.anchoredPosition = p + (dir == Vector2.down ? new Vector2(0f, Mathf.Abs(Mathf.Sin(Time.time * 3f)) * 8f) : Vector2.zero);
             giantMark.localScale = Vector3.one * pulse;
         }
+
+        RectTransform giantTail;
 
         RectTransform shipBubble;
         Text shipL;

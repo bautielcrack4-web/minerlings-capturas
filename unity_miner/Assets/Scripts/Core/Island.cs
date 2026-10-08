@@ -122,6 +122,7 @@ namespace Mineros.Core
         public float Y;
         public bool InComplex;
         public float QueueT;        // tiempo en la cola de una habitacion (orden de llegada)
+        public float StuckT, StuckBest = 1e9f, GhostT;   // anti-atasco al caminar (no se guarda)
     }
 
     /// <summary>
@@ -1178,7 +1179,7 @@ namespace Mineros.Core
             m.Target = -1;
         }
 
-        static void Set(Miner m, MState s) { m.State = s; m.T = 0f; }
+        static void Set(Miner m, MState s) { m.State = s; m.T = 0f; m.StuckT = 0f; m.StuckBest = 1e9f; }
 
         /// <summary>Camina hacia (x,z) esquivando edificios; true al llegar a menos de stop metros.</summary>
         bool Walk(Miner m, float x, float z, float stop, float dt, float perf)
@@ -1186,9 +1187,22 @@ namespace Mineros.Core
             float dx = x - m.X, dz = z - m.Z;
             float d = (float)Math.Sqrt(dx * dx + dz * dz);
             if (d <= stop) return true;
+            // anti-atasco (pedido del dueño: "un minero quedo caminando fijo en el lugar"): el desvio alrededor de los
+            // edificios podia anular el avance (entre dos edificios o con el destino pegado a otro). Si en 2.5 s no se
+            // acerco 25 cm: cerca del destino cuenta como llegado; lejos, cruza el obstaculo 1.6 s sin desviarse.
+            if (d < m.StuckBest - 0.25f) { m.StuckBest = d; m.StuckT = 0f; }
+            else m.StuckT += dt;
+            if (m.StuckT > 2.5f)
+            {
+                m.StuckT = 0f; m.StuckBest = d;
+                if (d < stop + 1.8f) return true;
+                m.GhostT = 1.6f;
+                AddStat("unstuck", 1);
+            }
             float vx = dx / d, vz = dz / d;
+            if (m.GhostT > 0f) m.GhostT -= dt;
             // esquivar huellas de edificios que no son el destino
-            foreach (var p in Plots)
+            if (m.GhostT <= 0f) foreach (var p in Plots)
             {
                 if (p.Building < 0) continue;
                 if (p.Building == (int)BKind.Barracks && InComplexState(m.State)) continue;   // entra al Complejo

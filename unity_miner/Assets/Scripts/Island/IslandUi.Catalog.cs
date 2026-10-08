@@ -24,10 +24,17 @@ namespace Mineros.IslandView
         {
             cityPlot = null;
             var fr = OpenSheet(CatH, false, 720f, 0.1f, false);
-            game.FocusOn(game.PlotWorld(p), false, 0.78f);   // la parcela arriba del cajon
+            // (la camara ya no se mueve al abrir el catalogo: el lugar se elige despues, al colocar)
             Kit.LabelAt(fr, Loc.T("Construir"), 38, Kit.Brown, 0, true, 28, 20, 300, 48, TextAnchor.MiddleLeft);
-            var bl = Kit.LabelAt(fr, "", 22, Kit.OrangeD, 0, true, 300, 24, 330, 40, TextAnchor.MiddleRight);
-            sheetRefresh.Add(() => bl.text = Loc.T("Constructores ") + Isl.FreeBuilders() + "/" + Isl.Builders() + Loc.T("  ·  Ayuntamiento ") + Isl.Th);
+            // constructores libres y nivel del Ayuntamiento, con iconos (sin palabras)
+            var hb = Kit.Icon(fr, "hammer", 34);
+            Kit.PlaceTL((RectTransform)hb.transform, 400, 26, 34, 34);
+            var bl = Kit.LabelAt(fr, "", 26, Kit.OrangeD, 0, true, 438, 24, 90, 40, TextAnchor.MiddleLeft);
+            var thI = Kit.Img(fr, IslandStage.I.BuildingIcon(BKind.Depot, Island.Tier(Mathf.Max(1, Isl.Th))), Color.white, "Ayuntamiento");
+            thI.preserveAspect = true;
+            Kit.PlaceTL(thI.rectTransform, 530, 16, 54, 54);
+            var tl = Kit.LabelAt(fr, "", 26, Kit.OrangeD, 0, true, 588, 24, 80, 40, TextAnchor.MiddleLeft);
+            sheetRefresh.Add(() => { bl.text = Isl.FreeBuilders() + "/" + Isl.Builders(); tl.text = Isl.Th.ToString(); });
 
             // pestañas: Todo + cada familia que tenga algo
             var fams = new List<BFamily>();
@@ -164,12 +171,22 @@ namespace Mineros.IslandView
             name.resizeTextForBestFit = true; name.resizeTextMinSize = 16; name.resizeTextMaxSize = 24;
             var desc = Kit.LabelAt(card.transform, d.Desc, 16, new Color(0.42f, 0.32f, 0.24f), 0, false, 12, 248, CardW - 24, 58, TextAnchor.UpperCenter);
             Kit.Wrap(desc);
+            // la descripcion aparece solo si se toca el dibujo (lo que se lee, a pedido)
+            desc.gameObject.SetActive(false);
+            icon.raycastTarget = true;
+            var it = icon.gameObject.AddComponent<Btn>();
+            it.PlaySound = false;
+            it.Clicked += () => desc.gameObject.SetActive(!desc.gameObject.activeSelf);
 
             if (locked)
             {
                 var lk = Kit.Icon(card.transform, "lock", 56);
                 Kit.PlaceTL((RectTransform)lk.transform, CardW * 0.5f - 28f, 76, 56, 56);
-                Kit.LabelAt(card.transform, Loc.T("Ayuntamiento ") + d.Th, 24, Kit.OrangeD, 0, true, 8, CardH - 92, CardW - 16, 44, TextAnchor.MiddleCenter);
+                // se abre con el Ayuntamiento N: su dibujo + el numero
+                var lth = Kit.Img(card.transform, IslandStage.I.BuildingIcon(BKind.Depot, Island.Tier(Mathf.Max(1, d.Th))), Color.white, "Ayuntamiento");
+                lth.preserveAspect = true;
+                Kit.PlaceTL(lth.rectTransform, CardW * 0.5f - 66f, CardH - 100, 64, 64);
+                Kit.LabelAt(card.transform, d.Th.ToString(), 34, Kit.OrangeD, 0, true, CardW * 0.5f + 2f, CardH - 92, 70, 48, TextAnchor.MiddleLeft);
                 var tap = card.gameObject.AddComponent<Btn>();
                 card.raycastTarget = true;
                 tap.PlaySound = false;

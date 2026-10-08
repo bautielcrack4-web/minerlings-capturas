@@ -70,6 +70,43 @@ namespace Mineros.IslandView
             return c;
         }
 
+        static readonly Dictionary<long, Material> wallCutMats = new Dictionary<long, Material>();
+        static readonly int idCutWall = Shader.PropertyToID("_CutWall"), idCutBaseY = Shader.PropertyToID("_CutBaseY");
+        static readonly int idCutRayO = Shader.PropertyToID("_CutRayO"), idCutRayD = Shader.PropertyToID("_CutRayD"), idCutFwd = Shader.PropertyToID("_CutFwd");
+
+        /// <summary>
+        /// Copia "pared" del material: con el zoom de interior se disuelve la parte de arriba de las paredes que quedan
+        /// del lado de la camara (zocalo de 30 cm sobre `baseY`). Una copia por material y por altura de piso.
+        /// </summary>
+        static Material CutWallMat(Material m, float baseY)
+        {
+            if (m == null) return null;
+            if (m.name.EndsWith("_Pared")) return m;   // ya es pared (Paredes dentro de Paredes)
+            string sn = m.shader != null ? m.shader.name : "";
+            if (sn != "Mineros/MinerToon" && sn != "Mineros/MinerToonVC" && sn != "Mineros/MinerToonTex") return m;
+            long key = ((long)m.GetInstanceID() << 16) ^ Mathf.RoundToInt(baseY * 100f);
+            Material c;
+            if (wallCutMats.TryGetValue(key, out c) && c != null) return c;
+            c = new Material(m) { name = m.name + "_Pared" };
+            c.EnableKeyword("_ROOFCUT");
+            c.SetFloat(idCutWall, 1f);
+            c.SetFloat(idCutBaseY, baseY);
+            wallCutMats[key] = c;
+            return c;
+        }
+
+        /// <summary>Pasa todas las paredes bajo `root` a la variante que se corta del lado de la camara.</summary>
+        static void MakeWallsCuttable(Transform root, float baseY)
+        {
+            if (root == null) return;
+            foreach (var r in root.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                var ms = r.sharedMaterials;
+                for (int i = 0; i < ms.Length; i++) ms[i] = CutWallMat(ms[i], baseY);
+                r.sharedMaterials = ms;
+            }
+        }
+
         /// <summary>Techo (y losas) de un piso: disuelto entero o puesto. Sin `instant`, lo anima UpdateRoofCut.</summary>
         void SetRoofGone(int f, bool gone, bool instant)
         {
@@ -159,6 +196,11 @@ namespace Mineros.IslandView
             float radius = Cam.orthographicSize * RoofCutK + RoofCutR;
             float a = roofCutAmt * roofCutAmt * (3f - 2f * roofCutAmt);
             Shader.SetGlobalVector(idRoofCut, new Vector4(c.x, c.y, c.z, radius));
+            // paredes: el rayo del centro (cada pared calcula el centro a la altura de su piso) y el adelante de la camara
+            Shader.SetGlobalVector(idCutRayO, ray.origin);
+            Shader.SetGlobalVector(idCutRayD, ray.direction);
+            Vector3 fw = Cam.transform.forward; fw.y = 0f; fw.Normalize();
+            Shader.SetGlobalVector(idCutFwd, new Vector4(fw.x, 0f, fw.z, 0f));
             roofCutC = c; roofCutR = radius;
             Shader.SetGlobalFloat(idRoofCutAmt, a);
 

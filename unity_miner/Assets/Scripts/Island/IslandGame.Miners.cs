@@ -143,7 +143,7 @@ namespace Mineros.IslandView
             Vector3 p = mv.Model.transform.position;
             FxApi.Play("levelup_aura", p, new Color(1f, 0.92f, 0.5f), 1.2f);
             FxApi.Play("rays", p + Vector3.up * MH(1.2f), new Color(1f, 0.9f, 0.5f), 0.6f);
-            Ui.Popup(p + Vector3.up * MH(2.6f), Island.Char(m).Name + Loc.T(" nivel ") + m.Level, new Color(0.7f, 1f, 0.5f), 28);
+            Ui.Popup(p + Vector3.up * MH(2.6f), Island.FirstName(m) + Loc.T(" nivel ") + m.Level, new Color(0.7f, 1f, 0.5f), 28);
             Sfx.Play("powerup", -8f, 1.1f);
             mv.Celebrate = 1f;
             Juice.Punch(mv.Model.transform, 0.25f, 0.3f);
@@ -156,7 +156,7 @@ namespace Mineros.IslandView
                 Juice.SlowMo(0.3f, 0.35f);
                 Sfx.PlayLater("fanfare_short", 0.1f, -6f);
                 Mineros.Fx.Haptics.Success();
-                Ui.Toast(Loc.T("¡") + Island.Char(m).Name + Loc.T(" estrena equipo!"), new Color(1f, 0.85f, 0.4f), null, true);
+                Ui.Toast(Loc.T("¡") + Island.FirstName(m) + Loc.T(" estrena equipo!"), new Color(1f, 0.85f, 0.4f), null, true);
             }
         }
 
@@ -167,7 +167,7 @@ namespace Mineros.IslandView
             Vector3 mid = (va.Model.transform.position + vb.Model.transform.position) * 0.5f;
             va.Celebrate = vb.Celebrate = 1f;
             Ui.FloatText(mid + Vector3.up * MH(2.2f), "♥", new Color(1f, 0.4f, 0.55f), 70);
-            Ui.Popup(mid + Vector3.up * 3f, Loc.T("¡") + Island.Char(a).Name + Loc.T(" y ") + Island.Char(b).Name + Loc.T(" son amigos!"), new Color(1f, 0.6f, 0.75f), 26);
+            Ui.Popup(mid + Vector3.up * 3f, Loc.T("¡") + Island.FirstName(a) + Loc.T(" y ") + Island.FirstName(b) + Loc.T(" son amigos!"), new Color(1f, 0.6f, 0.75f), 26);
             FxApi.Play("hit_spark", mid + Vector3.up * MH(1.4f), new Color(1f, 0.85f, 0.5f), 0.9f);   // choque de manos
             Sfx.Play("jingle_small", -8f, 1.15f);
         }

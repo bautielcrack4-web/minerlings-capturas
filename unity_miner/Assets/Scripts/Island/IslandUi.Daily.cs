@@ -176,11 +176,13 @@ namespace Mineros.IslandView
                 if (!Isl.ClaimMission(m)) { Sfx.Play("error", -8f); return; }
                 Sfx.Play("goal", -4f);
                 // sello de cumplida con aplastamiento
-                var st = Kit.Label(card.transform, Loc.T("¡LISTO!"), 44, Kit.Green, 7, true, TextAnchor.MiddleCenter, "Sello");
-                st.rectTransform.sizeDelta = new Vector2(260, 70);
-                st.rectTransform.anchoredPosition = new Vector2(80f, 0f);
-                st.rectTransform.localRotation = Quaternion.Euler(0, 0, -12f);
-                Tw.Scale(st.rectTransform, Vector3.one * 2.2f, Vector3.one, 0.25f, Ease.OutBack);
+                // sello ✔ (sin palabras) que cae con golpe sobre la tarjeta
+                var st = Kit.Icon(card.transform, "stamp", 96, "Sello");
+                var srt = (RectTransform)st.transform;
+                srt.anchoredPosition = new Vector2(120f, 0f);
+                srt.localRotation = Quaternion.Euler(0, 0, -14f);
+                Tw.Scale(srt, Vector3.one * 2.4f, Vector3.one, 0.22f, Ease.OutBack);
+                Mineros.Fx.Haptics.Heavy();
                 FlyCoins(LayerPos(card.rectTransform), 5);
                 FlyGems(LayerPos(card.rectTransform), m.Gems);
                 Juice.Vibrate(30);
@@ -246,13 +248,10 @@ namespace Mineros.IslandView
             coinI.preserveAspect = true;
             var reward = Kit.LabelAt(paper, "", 22, Kit.OrangeD, 0, true, 0, 202, W, 30, TextAnchor.MiddleCenter);
             var timer = Kit.LabelAt(paper, "", 16, new Color(0.6f, 0.52f, 0.45f), 0, false, 0, 234, W, 24, TextAnchor.MiddleCenter);
-            // "LISTO" chico con tilde en la esquina (antes: sello rojo gigante)
-            var ok = Kit.RoundImg(paper, 12, Kit.Green, "Listo").rectTransform;
-            Kit.Place(ok, 1f, 0f, -92f, 8f, 84, 26);
-            var okI = Kit.Img(ok, Icons.Get("check"), Color.white, "Tilde");
-            okI.preserveAspect = true;
-            Kit.PlaceTL(okI.rectTransform, 6, 3, 20, 20);
-            Kit.LabelAt(ok, Loc.T("LISTO"), 15, Color.white, 0, true, 26, 0, 54, 26, TextAnchor.MiddleCenter);
+            // sello ✔ chico en la esquina (sin palabras)
+            var ok = (RectTransform)Kit.Icon(paper, "stamp", 52, "Listo").transform;
+            Kit.Place(ok, 1f, 0f, -60f, 4f, 52, 52);
+            ok.localRotation = Quaternion.Euler(0, 0, -12f);
             ok.gameObject.SetActive(false);
             var b = Kit.Button(paper, Loc.T("Cobrar"), Kit.Green, 22, 136, 52);
             Kit.Place((RectTransform)b.transform, 0.5f, 1f, -68f, -62f, 136, 52);

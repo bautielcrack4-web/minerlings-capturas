@@ -140,7 +140,7 @@ namespace Mineros.IslandView
             bool showB = Isl.BalloonHere && game.Ambient != null && game.Ambient.BalloonVisible && sheet == null;
             if (balloonMark == null)
             {
-                balloonMark = Kit.MakeTag(worldLayer, Loc.T("Ruleta gratis"), Kit.Purple, 18);
+                balloonMark = Dot(worldLayer, Icons.Get("star"), Kit.Purple, 66, "RuletaGratis");   // globito con icono, sin texto
                 balloonMark.gameObject.SetActive(false);
             }
             if (balloonMark.gameObject.activeSelf != showB) { balloonMark.gameObject.SetActive(showB); if (showB) Tw.Pop(balloonMark, 1.4f); }

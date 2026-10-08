@@ -167,7 +167,7 @@ namespace Mineros.IslandView
             Isl.GoalDone += g => { Ui.GoalDone(g); Sfx.Play("goal", -3f); Mineros.Fx.Haptics.Success(); };
             Isl.Expanded += lv => OnExpanded();
             InitDiscover();
-            Isl.BalloonCame += () => { Ambient.BalloonCome(); Ui.Toast(Loc.T("¡Llegó el mercader! Tocá el globo: ruleta gratis"), Kit3.Yellow); Sfx.Play("event_start", -4f, 1.2f); };
+            Isl.BalloonCame += () => { Ambient.BalloonCome(); if (Isl.Stat("balloons") < 2) Ui.Toast(Loc.T("¡Llegó el mercader! Tocá el globo: ruleta gratis"), Kit3.Yellow); Sfx.Play("event_start", -4f, 1.2f); };
             Isl.BalloonGone += tapped => Ambient.BalloonGo(tapped);
             Isl.ChestGot += t => Ui.ChestGot(t);
             Isl.FrenzyStarted += OnFrenzy;
@@ -332,6 +332,9 @@ namespace Mineros.IslandView
                             for (int i = 0; i < ms.Length; i++) ms[i] = CutMat(ms[i]);
                             rr.sharedMaterials = ms;
                         }
+                    // las paredes del lado de la camara tambien se abren con el zoom (zocalo sobre la losa)
+                    foreach (var tr in inner.GetComponentsInChildren<Transform>(true))
+                        if (tr.name == "Paredes") MakeWallsCuttable(tr, v.Root.position.y + IslandArt.SlabH * inner.localScale.y);
                     v.Model = inner.GetComponentInChildren<MeshRenderer>();
                 }
                 else
@@ -349,6 +352,7 @@ namespace Mineros.IslandView
                 // banderines de nivel en el techo (un punto por nivel); el Cuartel tiene su bandera en la Sala central
                 if (k != BKind.Barracks) LevelFlags(v);
                 Garden(v);
+                LevelDress(v);   // una pieza visible por nivel (farol, banco, macetas...)
                 if (tier >= 4) FxApi.Attach("aura", v.Body, new Color(1f, 0.85f, 0.35f), 1.6f);   // etapa maxima: aura dorada
             }
             v.ShownKind = p.Building;
@@ -436,7 +440,7 @@ namespace Mineros.IslandView
             }
             bool evolve = Island.Tier(p.Level) != v.ShownTier;
             if (evolve) StartCoroutine(EvolveShow(v));
-            else StartCoroutine(UpgradeShow(v));
+            else StartCoroutine(LevelUpCeremony(v));   // (UpgradeShow: la version corta de antes)
         }
 
         IEnumerator ScaffoldUp(PlotView v)
@@ -548,7 +552,7 @@ namespace Mineros.IslandView
                 FocusOn(new Vector3(o.X, 0f, o.Z), true);
                 return;
             }
-            Ui.Toast(Loc.T("¡VETA GIGANTE! Todos a picar"), Kit3.Yellow);
+            if (Isl.Stat("giants") <= 2) Ui.Toast(Loc.T("¡VETA GIGANTE! Todos a picar"), Kit3.Yellow);   // las primeras veces; despues alcanza el globito
             Sfx.Play("event_start", -3f);
             Sfx.Play("bell", -8f);
             Juice.Vibrate(50);
