@@ -46,9 +46,9 @@ namespace Mineros.IslandView
                     break;
                 case BKind.Foundry: case BKind.GlassKiln: case BKind.GoldRefinery:
                     Color brick = k == BKind.GlassKiln ? H("5c6a7a") : H("8a3a2a");
-                    // desde el piso (adentro, en las esquinas de atras): con el techo abierto no quedan flotando
-                    Chimney(mb, new Vector3(0.55f, SlabH, 0.55f), roofY - SlabH + 0.95f + 0.03f * level, brick, true);
-                    Chimney(mb, new Vector3(-0.5f, SlabH, 0.55f), roofY - SlabH + 1.4f + 0.04f * level, brick, true);
+                    // afuera, pegadas a los costados y desde el suelo: con el techo abierto no tapan la sala ni quedan flotando
+                    Chimney(mb, new Vector3(ModW * 0.5f + 0.2f, 0f, 0.45f), roofY + 0.95f + 0.03f * level, brick, true);
+                    Chimney(mb, new Vector3(-ModW * 0.5f - 0.2f, 0f, 0.5f), roofY + 1.4f + 0.04f * level, brick, true);
                     // boca del horno brillando junto a la puerta
                     mb.Box(new Vector3(-1.2f, 0.35f, -0.3f), new Vector3(0.6f, 0.7f, 0.6f), brick, 0f);
                     mb.Box(new Vector3(-1.2f, 0.3f, -0.61f), new Vector3(0.3f, 0.26f, 0.02f), Ember, 1f);

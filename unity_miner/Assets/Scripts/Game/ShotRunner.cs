@@ -865,7 +865,8 @@ namespace Mineros.Game
                 // Plan Pueblo: Duchas como habitacion, con cola en la puerta
                 Module bath = null;
                 // en planta baja (la cola se arma en el suelo, frente a su puerta)
-                foreach (var cell in g.Isl.FreeCells(ModKind.Bath)) { if (cell[2] != 0) continue; bath = g.Isl.BuyModule(ModKind.Bath, cell[0], cell[1], cell[2], -1); if (bath != null) break; }
+                for (int pass = 0; pass < 2 && bath == null; pass++)
+                    foreach (var cell in g.Isl.FreeCells(ModKind.Bath)) { if (pass == 0 && cell[2] != 0) continue; bath = g.Isl.BuyModule(ModKind.Bath, cell[0], cell[1], cell[2], -1); if (bath != null) break; }
                 if (bath != null)
                 {
                     bath.Work = 0;
