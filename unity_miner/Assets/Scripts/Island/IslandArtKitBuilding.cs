@@ -77,10 +77,12 @@ namespace Mineros.IslandView
         }
 
         /// <summary>Anexo atras (+Z): sala angosta pegada a la pared del fondo, mas baja, con su techo y otra maquina.</summary>
+        const float AnnexX = 0.75f;
+
         static void KitAnnex(MeshBuilder code, List<RoomKit.Slot> walls, List<RoomKit.Slot> roofs, string th)
         {
             const float ad = 1.2f, ah = WallH * 0.82f;
-            Vector3 c = new Vector3(0f, 0f, ModW * 0.5f + ad * 0.5f);
+            Vector3 c = new Vector3(AnnexX, 0f, ModW * 0.5f + ad * 0.5f);   // corrido a la derecha: asoma de frente (forma de L)
             code.Box(c + new Vector3(0, SlabH * 0.5f, 0), new Vector3(ModW + 0.16f, SlabH, ad + 0.1f), Stone, 0f);
             code.Box(c + new Vector3(0, SlabH + 0.005f, 0), new Vector3(ModW - 0.2f, 0.01f, ad - 0.15f), Color.Lerp(Wood, Wall, 0.25f), 0f);
             string win = KitPiece(th, "ventana") ?? KitPiece(th, "pared"), wall = KitPiece(th, "pared");
@@ -205,7 +207,7 @@ namespace Mineros.IslandView
                         float s2 = 0.85f / foot;
                         r2.transform.localScale = Vector3.one * s2;
                         r2.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
-                        r2.transform.localPosition = new Vector3(-b.center.z * s2, SlabH - b.min.y * s2, ModW * 0.5f + 0.6f + b.center.x * s2);
+                        r2.transform.localPosition = new Vector3(AnnexX - b.center.z * s2, SlabH - b.min.y * s2, ModW * 0.5f + 0.6f + b.center.x * s2);
                     }
                 }
             }
